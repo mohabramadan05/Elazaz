@@ -14,8 +14,8 @@ type Props = {
 
 export default function ProductCard({ product }: Props) {
   return (
-    <div className="group relative h-50 w-31 sm:h-90 sm:w-57 flex flex-col items-left bg-[#F4F5F7] shadow-md">
-      <div className="hidden group-hover:flex absolute  h-50 w-31 sm:h-90 sm:w-57 top-0 right-0 bg-[#3A3A3A99] pointer-events-none  flex-col items-center justify-center gap-3">
+    <div className="group relative flex flex-col items-left bg-[#F4F5F7] shadow-md w-full">
+      <div className="hidden md:group-hover:flex absolute inset-0 bg-[#3A3A3A99] pointer-events-none flex-col items-center justify-center gap-3">
         <button className="bg-white text-[#B47720] text-xs sm:text-base px-3 py-2 sm:px-6 sm:py-2 font-bold">
           أضف إلى السلة
         </button>
@@ -77,13 +77,15 @@ export default function ProductCard({ product }: Props) {
           </div>
         </div>
       </div>
-      <Image
-        src={product.image}
-        alt={product.name}
-        width={1000}
-        height={1000}
-        className="h-33 w-31 sm:h-65 sm:w-57"
-      />
+      <div className="relative w-full aspect-[4/5] bg-white">
+        <Image
+          src={product.image}
+          alt={product.name}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-cover"
+        />
+      </div>
       <div>
         <h3 className="mt-1 text-sm sm:text-lg font-medium text-[#3A3A3A] text-right px-2">
           {product.name}

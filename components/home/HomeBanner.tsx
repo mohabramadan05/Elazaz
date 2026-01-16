@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function HomeBanner() {
   return (
-    <section className="relative h-screen overflow-hidden flex flex-col md:flex-row-reverse">
+    <section className="relative min-h-[70vh] md:min-h-screen overflow-hidden flex flex-col md:flex-row-reverse">
       {/* Background Image (mobile) + Left Image (desktop) */}
       <div className="absolute inset-0 md:relative md:w-1/2">
         <Image
@@ -17,8 +17,8 @@ export default function HomeBanner() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex items-center justify-center h-full md:w-1/2 bg-transparent md:bg-[#fafafa] text-right p-6">
-        <div className="max-w-md p-5 bg-[#fff3e386] backdrop-blur-sm rounded-xl">
+      <div className="relative z-10 flex items-center justify-center h-full md:w-1/2 bg-transparent md:bg-[#fafafa] text-right p-4 sm:p-6 md:p-10">
+        <div className="max-w-md p-4 sm:p-5 bg-[#fff3e386] backdrop-blur-sm rounded-xl">
           <p className="text-sm md:text-base lg:text-lg mb-4 text-[#333333]">
             وصل حديثاً
           </p>

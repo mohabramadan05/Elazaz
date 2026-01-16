@@ -58,7 +58,7 @@ export default function ProductCarousel() {
     <section className="bg-[#FCF8F3] px-4 sm:px-6 md:px-10 py-8 md:py-10">
       <div className="flex flex-col-reverse lg:flex-row lg:justify-center lg:items-center gap-6 md:gap-8 lg:gap-16 container mx-auto">
         {/* Text Content */}
-        <div className="flex flex-col items-start max-w-md order-2 lg:order-1">
+        <div className="flex flex-col items-center text-center sm:items-start sm:text-right max-w-md order-2 lg:order-1">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
             أكثر من 50 شنطة جميلة لاقتنائها
           </h2>
@@ -98,7 +98,7 @@ export default function ProductCarousel() {
               const isActive = index === activeIndex;
 
               return (
-                <SwiperSlide key={product.id} className="w-52! sm:w-60! md:w-67!">
+                <SwiperSlide key={product.id} className="w-48 sm:w-56 md:w-64">
                   <div className="relative bg-white rounded-sm overflow-hidden shadow-lg">
                     {/* Product Image */}
                     <div className="h-64 sm:h-80 md:h-96 overflow-hidden bg-gray-100 relative">
@@ -140,7 +140,7 @@ export default function ProductCarousel() {
           <button
             onClick={() => swiperInstance?.slidePrev()}
             disabled={isBeginning}
-            className={`absolute top-1/2 -translate-y-1/2 right-0 sm:right-2 z-10 p-2 sm:p-3 rounded-full transition-all duration-300 shadow-lg ${
+            className={`hidden sm:flex absolute top-1/2 -translate-y-1/2 right-0 sm:right-2 z-10 p-2 sm:p-3 rounded-full transition-all duration-300 shadow-lg ${
               isBeginning
                 ? "opacity-0 pointer-events-none"
                 : "bg-white hover:bg-[#B47720] hover:text-white text-gray-800"
@@ -152,7 +152,7 @@ export default function ProductCarousel() {
           <button
             onClick={() => swiperInstance?.slideNext()}
             disabled={isEnd}
-            className={`absolute top-1/2 -translate-y-1/2 left-0 sm:left-2 z-10 p-2 sm:p-3 rounded-full transition-all duration-300 shadow-lg ${
+            className={`hidden sm:flex absolute top-1/2 -translate-y-1/2 left-0 sm:left-2 z-10 p-2 sm:p-3 rounded-full transition-all duration-300 shadow-lg ${
               isEnd
                 ? "opacity-0 pointer-events-none"
                 : "bg-white hover:bg-[#B47720] hover:text-white text-gray-800"
@@ -162,7 +162,7 @@ export default function ProductCarousel() {
           </button>
 
           {/* Navigation Controls - Bottom Left */}
-          <div className="absolute bottom-2 left-2 z-10 flex items-center gap-4">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 sm:left-2 sm:translate-x-0 z-10 flex items-center gap-4">
             {/* Dots Indicator */}
             <div className="flex gap-2">
               {products.map((_, index) => (
