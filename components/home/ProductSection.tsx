@@ -3,9 +3,9 @@ import Link from "next/link";
 
 export default function ProductSection() {
   return (
-    <section className="py-3 px-4 sm:py-12 sm:px-16 flex flex-col gap-5 items-center bg-[#ffffff]">
+    <section className="py-6 sm:py-12 px-4 sm:px-8 lg:px-16 flex flex-col gap-5 items-center bg-[#ffffff]">
       <h2 className="text-xl sm:text-2xl font-semibold mb-1 ">منتجاتنا</h2>
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
+      <div className="grid w-full max-w-6xl grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         {[
           {
             id: 1,
@@ -68,7 +68,7 @@ export default function ProductSection() {
         ))}
        
       </div>
-       <Link href="/products" className="mt-2 flex items-center justify-center border-2 text-[#B47720] border-[#B47720] py-2 px-12 hover:bg-gray-100 transition">
+       <Link href="/products" className="mt-2 flex items-center justify-center border-2 text-[#B47720] border-[#B47720] py-2 px-10 sm:px-12 hover:bg-gray-100 transition">
           عرض المزيد 
         </Link>
     </section>

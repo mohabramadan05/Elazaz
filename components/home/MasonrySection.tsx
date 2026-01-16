@@ -26,7 +26,7 @@ const products: Product[] = [
     slogan: "تميز واضح",
     image: "/assets/demo/2.jpg",
     height: "short", // h-64
-    marginTop: "mt-5 sm:mt-20 lg:mt-22 xl:mt-20",
+    marginTop: "mt-3 sm:mt-12 lg:mt-16 xl:mt-20",
   }, 
   {
     id: 3,
@@ -34,7 +34,7 @@ const products: Product[] = [
     slogan: "راحة وأناقة",
     image: "/assets/demo/3.jpg",
     height: "medium", // h-80
-    marginTop: "0 sm:mt-0 lg:mt-18 xl:mt-45",
+    marginTop: "mt-0 sm:mt-6 lg:mt-12 xl:mt-20",
   },
   {
     id: 4,
@@ -42,7 +42,7 @@ const products: Product[] = [
     slogan: "سحر خاص",
     image: "/assets/demo/1.jpg",
     height: "tall",
-    marginTop: "mt-0 sm:mt-0 lg:mt-0 xl:mt-17",
+    marginTop: "mt-0 sm:mt-0 lg:mt-0 xl:mt-16",
   },
   {
     id: 5,
@@ -97,15 +97,6 @@ const heightClasses = {
 export default function MasonryProducts() {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
 
-  // Distribute products into columns manually to preserve order
-  const columnsCount = 5;
-  const columns: Product[][] = Array.from({ length: columnsCount }, () => []);
-  
-  products.forEach((product, index) => {
-    const columnIndex = index % columnsCount;
-    columns[columnIndex].push(product);
-  });
-
   return (
     <section className="bg-[#FCF8F3] px-4 sm:px-6 md:px-10 py-8 md:py-12">
       <div className="container mx-auto">
@@ -119,42 +110,38 @@ export default function MasonryProducts() {
           </h2>
         </div>
 
-        {/* Masonry Grid - Manual columns to preserve order */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-          {columns.map((column, columnIndex) => (
-            <div key={columnIndex} className="flex flex-col gap-4 md:gap-6">
-              {column.map((product) => (
+        {/* Masonry Grid */}
+        <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4 md:gap-6 space-y-4 md:space-y-6">
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className={`break-inside-avoid ${product.marginTop || ""}`}
+              onMouseEnter={() => setHoveredId(product.id)}
+              onMouseLeave={() => setHoveredId(null)}
+            >
+              <div className="relative group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+                {/* Product Image */}
                 <div
-                  key={product.id}
-                  className={`${product.marginTop || ""}`}
-                  onMouseEnter={() => setHoveredId(product.id)}
-                  onMouseLeave={() => setHoveredId(null)}
+                  className={`${
+                    heightClasses[product.height as keyof typeof heightClasses]
+                  } relative overflow-hidden bg-gray-100`}
                 >
-                  <div className="relative group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
-                    {/* Product Image */}
-                    <div
-                      className={`${
-                        heightClasses[product.height as keyof typeof heightClasses]
-                      } relative overflow-hidden bg-gray-100`}
-                    >
-                      <Image
-                        src={product.image}
-                        alt={product.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
-                      />
+                  <Image
+                    src={product.image}
+                    alt={product.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+                  />
 
-                      {/* Overlay on hover */}
-                      <div
-                        className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
-                          hoveredId === product.id ? "opacity-100" : "opacity-0"
-                        }`}
-                      />
-                    </div>
-                  </div>
+                  {/* Overlay on hover */}
+                  <div
+                    className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
+                      hoveredId === product.id ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
                 </div>
-              ))}
+              </div>
             </div>
           ))}
         </div>
