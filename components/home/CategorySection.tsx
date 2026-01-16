@@ -2,30 +2,35 @@ import Image from "next/image";
 
 export default function CategorySection() {
   return (
-    <section className="py-10 sm:py-12 px-4 sm:px-8 lg:px-16 flex flex-col items-center bg-[#ffffff]">
-      <h2 className="text-xl sm:text-2xl font-semibold mb-1 ">تصفح المجموعة</h2>
+    <section className="py-8 px-32 flex flex-col items-start bg-[#ffffff]">
+      <h2 className="text-xl sm:text-2xl font-semibold mb-1 ">
+        تسوق حسب الفئات
+      </h2>
       <p className="text-sm sm:text-base text-gray-600 mb-10">
-        لوريم إيبسوم دولور سيت أميت، كونسيكتتور أديبيسكيغ إليت
+        تسوق احدث المنتجات المميزة المضافة جديد{" "}
       </p>
-      <div className="grid w-full max-w-5xl grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
         {[
-          { name: "شنط", image: "/assets/demo/1.jpg" },
-          { name: "احذية", image: "/assets/demo/2.jpg" },
-          { name: "اكسسوارات", image: "/assets/demo/3.jpg" },
+          { name: "شنط", image: "/assets/demo/1.jpg" , item_count: 120},
+          { name: "احذية", image: "/assets/demo/2.jpg" , item_count: 80},
+          { name: "اكسسوارات", image: "/assets/demo/3.jpg" , item_count: 45},
         ].map((category) => (
-          <div key={category.name} className="flex flex-col items-center">
-            <div className="relative w-full max-w-[220px] sm:max-w-none aspect-[4/5] rounded-lg overflow-hidden flex items-center justify-center">
+          <div key={category.name}>
+            <div className="h-35 w-35 rounded-full overflow-hidden flex items-center justify-center">
               <Image
                 src={category.image}
                 alt={category.name}
-                fill
-                sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 240px"
-                className="object-cover"
+                width={500}
+                height={500}
+                className="h-35 w-35 object-cover rounded-full"
               />
             </div>
-            <h3 className="mt-2 text-lg font-medium text-center">
+            <h3 className="mt-2 text-md font-medium text-center">
               {category.name}
             </h3>
+            <p className="text-[#666666] text-sm text-center">
+              {category.item_count} منتج
+            </p>
           </div>
         ))}
       </div>

@@ -1,95 +1,100 @@
 import Image from "next/image";
+// import NewsLetter from "./NewLetter";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSnapchatGhost,
+  faInstagram,
+  faTwitter,
+  faFacebookF,
+} from "@fortawesome/free-brands-svg-icons";
 
 export default function Header() {
   return (
-    <footer className="border-t border-black/17 px-4 sm:px-8 lg:px-16 py-6 mt-12">
-      <div className="container mx-auto flex flex-col lg:flex-row justify-between items-start gap-8 mb-8">
-        {/* Logo and Address */}
-        <div className="w-full lg:w-auto">
-          <Image
-            src="/assets/logo.png"
-            alt="ELAZAZ Logo"
-            width={100}
-            height={50}
-            className="mb-4"
-          />
-          <p className="text-[#9F9F9F] text-sm">
-            400 يونيفرسيتي درايف سويت 200 كورال جابلز،
-            <br />
-            فلوريدا 33134 الولايات المتحدة الأمريكية
-          </p>
-        </div>
+    <footer className="mt-12">
+      {/* <NewsLetter /> */}
 
-        {/* Links Section */}
-        <div className="grid grid-cols-2 gap-8 sm:gap-16 w-full lg:w-auto">
+      <div className="bg-white py-16 px-6 xl:px-28 text-[#333]">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-10">
+          {/* About */}
+          <div className="xl:col-span-1">
+            <h3 className="font-semibold text-lg mb-4">عن متجرنا</h3>
+            <p className="text-sm leading-relaxed text-[#666]">
+              عزاز هو متجر رائد متخصص في بيع الحقائب والأحذية الفاخرة. اكتشف
+              أحدث التشكيلات واستمتع بتجربة تسوق فريدة مع عروض حصرية وخصومات لا
+              تقبل المنافسة.
+            </p>
+          </div>
+
+          {/* Account */}
           <div>
-            <h3 className="text-[#9F9F9F] font-semibold mb-4">روابط</h3>
-            <ul className="space-y-2">
-              <li>
-                <a href="#" className="hover:underline hover:text-[#B47720] transition-colors">
-                  الصفحة الرئيسية
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:underline hover:text-[#B47720] transition-colors">
-                  منتجات
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:underline hover:text-[#B47720] transition-colors">
-                  من نحن
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:underline hover:text-[#B47720] transition-colors">
-                  اتصل بنا
-                </a>
-              </li>
+            <h3 className="font-semibold text-lg mb-4">حسابي</h3>
+            <ul className="flex flex-col gap-3 text-sm text-[#666]">
+              <li>« حسابي</li>
+              <li className="text-[#C58A3A]">« طلباتي</li>
+              <li>« سلة المشتريات</li>
+              <li>« المفضلة</li>
             </ul>
           </div>
+
+          {/* Important Links */}
           <div>
-            <h3 className="text-[#9F9F9F] font-semibold mb-4">مساعدة</h3>
-            <ul className="space-y-2">
-              <li>
-                <a href="#" className="hover:underline hover:text-[#B47720] transition-colors">
-                  خيارات الدفع
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:underline hover:text-[#B47720] transition-colors">
-                  المرتجعات
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:underline hover:text-[#B47720] transition-colors">
-                  سياسات الخصوصية
-                </a>
-              </li>
+            <h3 className="font-semibold text-lg mb-4">روابط مهمة</h3>
+            <ul className="flex flex-col gap-3 text-sm text-[#666]">
+              <li>« من نحن</li>
+              <li>« سياسة الخصوصية</li>
+              <li>« الشروط والأحكام</li>
+              <li>« الدعم الفني</li>
             </ul>
           </div>
-        </div>
 
-        {/* Newsletter Section */}
-        <div className="flex flex-col gap-2 w-full lg:w-auto">
-          <h3 className="text-[#9F9F9F] font-semibold mb-2">
-            النشرة الإخبارية
-          </h3>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <input
-              type="email"
-              className="text-black border-b-2 border-black hover:border-[#B47720] focus:border-[#B47720] focus:outline-none placeholder:text-gray-500 focus:placeholder:text-[#B47720] pr-2 pl-8 py-2 transition-all duration-300 w-full sm:w-auto"
-              placeholder="أدخل عنوان بريدك الإلكتروني"
-            />
-            <button className="text-black border-b-2 border-black hover:border-2 hover:border-[#B47720] hover:text-[#B47720] pr-2 pl-8 py-2 transition-all duration-300 whitespace-nowrap">
-              اشتراك
-            </button>
+          {/* Contact */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4">تواصل معنا</h3>
+            <ul className="flex flex-col gap-3 text-sm text-[#666]">
+              <li>
+                « واتساب : <span dir="ltr">+966558441497</span>
+              </li>
+              <li>
+                « موبايل : <span dir="ltr">+966558441497</span>
+              </li>
+              <li>« البريد : https://elazaz.sait</li>
+            </ul>
+          </div>
+
+          {/* Social */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4">تابعنا على</h3>
+            <div className="flex gap-3">
+              <div className="w-10 h-10 flex items-center justify-center rounded-full border border-[#EEE] text-[#999] hover:text-[#C58A3A] hover:border-[#C58A3A] transition">
+                <FontAwesomeIcon icon={faSnapchatGhost} />
+              </div>
+              <div className="w-10 h-10 flex items-center justify-center rounded-full border border-[#EEE] text-[#999] hover:text-[#C58A3A] hover:border-[#C58A3A] transition">
+                <FontAwesomeIcon icon={faInstagram} />
+              </div>
+              <div className="w-10 h-10 flex items-center justify-center rounded-full border border-[#EEE] text-[#999] hover:text-[#C58A3A] hover:border-[#C58A3A] transition">
+                <FontAwesomeIcon icon={faTwitter} />
+              </div>
+              <div className="w-10 h-10 flex items-center justify-center rounded-full border border-[#EEE] text-[#999] hover:text-[#C58A3A] hover:border-[#C58A3A] transition">
+                <FontAwesomeIcon icon={faFacebookF} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Copyright */}
-      <div className="mx-auto text-center text-gray-600 text-sm pt-4 border-t border-gray-200">
-        &copy; {new Date().getFullYear()} ELAZAZ. جميع الحقوق محفوظة.
+      <div className="flex flex-row items-center justify-around text-white bg-[#1D1F1F] text-sm p-4">
+       <span>
+          &copy; {new Date().getFullYear()} ELAZAZ. جميع الحقوق محفوظة.
+        </span>
+        <div className="flex flex-row justify-end gap-2 items-center">
+          <Image src="/assets/vat.jpg" width={22.5} height={30}  alt="vat" />
+          <p className="pe-5">123124123123 : الرقم الضريبي</p>
+          <Image src="/assets/visa.png" width={64} height={31} alt="visa" />
+          <Image src="/assets/mastercard.png" width={60} height={31} alt="mastercard" />
+          <Image src="/assets/paypal.png" width={60} height={31} alt="paypal" />
+        </div>
+        
       </div>
     </footer>
   );

@@ -1,41 +1,122 @@
-import Image from "next/image";
+"use client";
 
-export default function HomeBanner() {
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay, EffectFade } from "swiper/modules";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/effect-fade";
+
+const slides = [
+  {
+    title: "أفضل التخفيضات 2025",
+    subtitle:
+      "عزاز للشنط والأحذية يقدم أحدث تشكيلات الحقائب من أرقى الماركات العالمية لهذا العام.",
+    button: "اكتشف المزيد",
+    image:
+      "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=1920",
+  },
+  {
+    title: "أناقة لا تُضاهى",
+    subtitle:
+      "تصاميم جلدية فاخرة تجمع بين الكلاسيك والعصرية لتناسب جميع الأذواق.",
+    button: "تسوق الآن",
+    image:
+      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1920",
+  },
+  {
+    title: "مجموعة حصرية",
+    subtitle: "اكتشفي أحدث صيحات الموضة في عالم الشنط الفاخرة بأسعار مميزة.",
+    button: "استكشف المجموعة",
+    image:
+      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1920",
+  },
+];
+
+export default function LuxuryBagsSwiper() {
   return (
-    <section className="relative min-h-[70vh] md:min-h-screen overflow-hidden flex flex-col md:flex-row-reverse">
-      {/* Background Image (mobile) + Left Image (desktop) */}
-      <div className="absolute inset-0 md:relative md:w-1/2">
-        <Image
-          src="/assets/Banner.jpg"
-          alt="Home banner"
-          fill
-          priority
-          className="object-cover"
-        />
-        {/* Dark overlay for mobile readability */}
-        <div className="absolute inset-0 bg-black/10 md:hidden" />
-      </div>
+    <section className="relative w-full h-130 overflow-hidden bg-black">
+      <Swiper
+        modules={[Navigation, Pagination, Autoplay, EffectFade]}
+        loop
+        effect="fade"
+        autoplay={{ delay: 5000, disableOnInteraction: false }}
+        pagination={{ clickable: true }}
+        navigation={{
+          nextEl: ".lux-next",
+          prevEl: ".lux-prev",
+        }}
+        className="h-full"
+      >
+        {slides.map((slide, i) => (
+          <SwiperSlide key={i}>
+            <div className="relative w-full h-full">
+              {/* Background */}
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${slide.image})` }}
+              />
 
-      {/* Content */}
-      <div className="relative z-10 flex items-center justify-center h-full md:w-1/2 bg-transparent md:bg-[#fafafa] text-right p-4 sm:p-6 md:p-10">
-        <div className="max-w-md p-4 sm:p-5 bg-[#fff3e386] backdrop-blur-sm rounded-xl">
-          <p className="text-sm md:text-base lg:text-lg mb-4 text-[#333333]">
-            وصل حديثاً
-          </p>
+              {/* Black fade */}
+              <div className="absolute inset-0 bg-black/50" />
 
-          <h1 className="text-lg md:text-2xl lg:text-4xl font-bold mb-4 text-[#B47720]">
-            اكتشف مجموعتنا الجديدة
-          </h1>
+              {/* Content */}
+              <div className="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-4">
+                <h1 className="text-4xl md:text-6xl font-bold mb-4">
+                  {slide.title}
+                </h1>
+                <p className="max-w-3xl text-base md:text-lg opacity-90 mb-8">
+                  {slide.subtitle}
+                </p>
+                <button className="bg-[#B47720] hover:bg-[#b47620d1] px-10 py-3 rounded-sm font-semibold transition">
+                  {slide.button}
+                </button>
+              </div>
 
-          <p className="text-sm md:text-base lg:text-lg mb-6 text-[#333333]">
-            لوريم إيبسوم دولور سيت أميت، كونسيكتيتور أديبيسكيغ إليت.
-          </p>
+              {/* Brand
+              <div className="absolute bottom-6 right-6 text-3xl font-bold text-white/70">
+                elazaz
+              </div> */}
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
-          <button className="bg-[#B47720] text-white px-4 py-2 md:px-6 md:py-3 hover:bg-[#b47620ea] transition">
-            اشتري الآن
-          </button>
-        </div>
-      </div>
+      {/* Navigation */}
+      <button className="lux-prev absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full border-2 border-[#EEEEEE] hover:bg-white/30 backdrop-blur flex items-center justify-center">
+        <ChevronLeft className="text-white" />
+      </button>
+
+      <button className="lux-next absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full border-2 border-[#EEEEEE] hover:bg-white/30 backdrop-blur flex items-center justify-center">
+        <ChevronRight className="text-white" />
+      </button>
+
+      {/* Pagination style */}
+      <style jsx global>{`
+        .swiper-pagination {
+          bottom: 24px !important;
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+        }
+        .swiper-pagination-bullet {
+          width: 14px;
+          height: 14px;
+          background: transparent;
+          border: 1px solid #eeeeee;
+          opacity: 1;
+          transition: 0.3s;
+        }
+        .swiper-pagination-bullet-active {
+          width: 36px;
+          border-radius: 6px;
+          background: #b47720;
+          opacity: 1;
+          border: none;
+        }
+      `}</style>
     </section>
   );
 }
