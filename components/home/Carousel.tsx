@@ -59,7 +59,7 @@ export default function ProductCarousel() {
       <div className="flex flex-col-reverse lg:flex-row lg:justify-center lg:items-center gap-6 md:gap-8 lg:gap-16 container mx-auto">
         {/* Text Content */}
         <div className="flex flex-col items-start max-w-md order-2 lg:order-1">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+          <h2 className="text-xl sm:text-2xl md:text-4xl font-bold mb-2">
             أكثر من 50 شنطة جميلة لاقتنائها
           </h2>
           <p className="text-sm sm:text-base text-gray-600 mb-4 md:mb-6">
@@ -68,14 +68,14 @@ export default function ProductCarousel() {
           </p>
           <Link
             href="/"
-            className="py-3 md:py-4 px-6 md:px-8 bg-[#B47720] text-white hover:bg-[#9d6419] transition-colors text-sm md:text-base"
+            className="py-2.5 sm:py-3 md:py-4 px-5 sm:px-6 md:px-8 bg-[#B47720] text-white hover:bg-[#9d6419] transition-colors text-sm md:text-base"
           >
             استكشف المزيد
           </Link>
         </div>
 
         {/* Carousel */}
-        <div className="relative pb-8 lg:pb-5 w-full max-w-3xl order-1 lg:order-2">
+        <div className="relative pb-10 sm:pb-8 lg:pb-5 w-full max-w-3xl order-1 lg:order-2">
           {/* Swiper Carousel */}
           <Swiper
             modules={[Navigation, Pagination, EffectCoverflow]}
@@ -92,16 +92,16 @@ export default function ProductCarousel() {
             }}
             onSwiper={setSwiperInstance}
             onSlideChange={handleSlideChange}
-            className="pb-12"
+            className="pb-10 sm:pb-12"
           >
             {products.map((product, index) => {
               const isActive = index === activeIndex;
 
               return (
-                <SwiperSlide key={product.id} className="w-52! sm:w-60! md:w-67!">
+                <SwiperSlide key={product.id} className="w-48! sm:w-60! md:w-67!">
                   <div className="relative bg-white rounded-sm overflow-hidden shadow-lg">
                     {/* Product Image */}
-                    <div className="h-64 sm:h-80 md:h-96 overflow-hidden bg-gray-100 relative">
+                    <div className="h-56 sm:h-80 md:h-96 overflow-hidden bg-gray-100 relative">
                       <Image
                         src={product.image}
                         alt={product.title}
@@ -115,16 +115,16 @@ export default function ProductCarousel() {
                     {/* Active Overlay - Only for active card */}
                     {isActive && (
                       <div className="absolute flex flex-row items-end bottom-0 left-0 right-0 p-2 sm:p-4">
-                        <div className="pt-4 sm:pt-6 pl-6 sm:pl-10 pr-2 sm:pr-3 pb-2 flex flex-col justify-end bg-white/80 flex-1">
+                        <div className="pt-3 sm:pt-6 pl-4 sm:pl-10 pr-2 sm:pr-3 pb-2 flex flex-col justify-end bg-white/80 flex-1">
                           <p className="text-xs sm:text-sm md:text-base mb-1 text-[#616161]">
                             {product.title}
                           </p>
-                          <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1 sm:mb-2">
+                          <h3 className="text-sm sm:text-lg md:text-xl font-bold mb-1 sm:mb-2">
                             {product.slogan}
                           </h3>
                         </div>
                         <Link href="/">
-                          <div className="p-3 sm:p-4 w-10 h-10 sm:w-12 sm:h-12 flex text-white justify-center items-center bg-[#B47720] hover:bg-[#9d6419] transition-colors">
+                          <div className="p-2.5 sm:p-4 w-9 h-9 sm:w-12 sm:h-12 flex text-white justify-center items-center bg-[#B47720] hover:bg-[#9d6419] transition-colors">
                             <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 sm:w-5 sm:h-5" />
                           </div>
                         </Link>
@@ -162,7 +162,7 @@ export default function ProductCarousel() {
           </button>
 
           {/* Navigation Controls - Bottom Left */}
-          <div className="absolute bottom-2 left-2 z-10 flex items-center gap-4">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 sm:left-2 sm:translate-x-0 z-10 flex items-center gap-4">
             {/* Dots Indicator */}
             <div className="flex gap-2">
               {products.map((_, index) => (

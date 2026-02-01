@@ -37,7 +37,7 @@ const slides = [
 
 export default function LuxuryBagsSwiper() {
   return (
-    <section className="relative w-full h-110 sm:h-120 lg:h-130 overflow-hidden bg-black">
+    <section className="relative w-full h-105 sm:h-130 lg:h-160 overflow-hidden bg-black">
       <Swiper
         modules={[Navigation, Pagination, Autoplay, EffectFade]}
         loop
@@ -60,7 +60,7 @@ export default function LuxuryBagsSwiper() {
               />
 
               {/* Black fade */}
-              <div className="absolute inset-0 bg-black/50" />
+              <div className="absolute inset-0 bg-[#b47620cb]" />
 
               {/* Content */}
               <div className="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-4 sm:px-8">
@@ -70,7 +70,7 @@ export default function LuxuryBagsSwiper() {
                 <p className="max-w-3xl text-sm sm:text-base lg:text-lg opacity-90 mb-6 sm:mb-8">
                   {slide.subtitle}
                 </p>
-                <button className="bg-[#B47720] hover:bg-[#b47620d1] px-6 py-2 text-sm sm:px-10 sm:py-3 sm:text-base rounded-sm font-semibold transition">
+                <button className="bg-[#FFF] hover:bg-[#FFFFFFD1] text-[#333] px-6 py-2 text-sm sm:px-10 sm:py-3 sm:text-base rounded-sm font-semibold transition">
                   {slide.button}
                 </button>
               </div>
