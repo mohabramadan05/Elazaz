@@ -321,15 +321,15 @@ export default function ProductInfo({
         {compareAtPrice ? (
           <div className="flex items-center gap-3">
             <span className="text-2xl font-semibold text-[#F55157]">
-              {price} ر.س
+              {price} ج.م
             </span>
             <span className="text-sm text-[#9A9A9A] line-through">
-              {compareAtPrice} ر.س
+              {compareAtPrice} ج.م
             </span>
           </div>
         ) : (
           <span className="text-2xl font-semibold text-[#F55157]">
-            {price} ر.س
+            {price} ج.م
           </span>
         )}
       </div>

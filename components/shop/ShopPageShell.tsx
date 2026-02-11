@@ -7,6 +7,7 @@ import type { ShopProduct } from "@/lib/data/products";
 import type { Category } from "@/lib/data/categories";
 import type { Color } from "@/lib/data/colors";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type Props = {
   products: ShopProduct[];
@@ -35,6 +36,7 @@ export default function ShopPageShell({
   colors,
   initialCategoryId,
 }: Props) {
+  const router = useRouter();
   const [view, setView] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("newest");
   const [categoryId, setCategoryId] = useState(initialCategoryId ?? "all");
@@ -128,6 +130,13 @@ export default function ShopPageShell({
   const handleCategoryChange = (next: string) => {
     setCategoryId(next);
     setPage(1);
+    if (initialCategoryId !== undefined) {
+      if (next === "all") {
+        router.push("/shop");
+      } else {
+        router.push(`/shop/category/${next}`);
+      }
+    }
   };
 
   const handleColorChange = (next: string) => {
@@ -172,150 +181,164 @@ export default function ShopPageShell({
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[260px_1fr]">
-          <aside className="space-y-6">
-            <div className="rounded-sm border border-[#EEEEEE] bg-white p-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-[#333333]">الفئة</h3>
-                <button
-                  type="button"
-                  className="text-xs text-[#B47720] accent-[#F5B301] outline-none"
-                  onClick={() => setCategoryId("all")}
-                >
-                  الكل
-                </button>
-              </div>
-              <div className="mt-3 space-y-2 text-sm text-[#666666]">
-                {categories.map((category) => (
-                  <label
-                    key={category.id}
-                    className="flex items-center gap-3 cursor-pointer select-none"
-                  >
-                    <input
-                      type="radio"
-                      name="category"
-                      checked={categoryId === category.id}
-                      onChange={() => handleCategoryChange(category.id ?? null)}
-                      className="peer sr-only"
-                    />
-
-                    {/* Radio circle */}
-                    <span className="h-4 w-4 aspect-square shrink-0 rounded-full border-2 border-[#D9D9D9] peer-checked:border-[#B47720] peer-checked:bg-[#B47720] flex items-center justify-center transition-colors">
-                      {/* White inner circle when checked */}
-                      <span className="h-2 w-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                    </span>
-
-                    <div className="flex w-full items-center justify-between">
-                      <span className="text-sm text-[#666666]">
-                        {category.name ?? "—"}
-                      </span>
-
-                      <span className="text-xs text-[#999999]">
-                        ({categoryCounts.get(category.id ?? "") ?? 0})
-                      </span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-sm border border-[#EEEEEE] bg-white p-4">
-              <h3 className="text-sm font-semibold text-[#333333]">السعر</h3>
-              <div className="mt-3 flex items-center gap-2 text-xs text-[#666666]">
-                <input
-                  type="number"
-                  value={minPrice}
-                  onChange={(event) =>
-                    handleMinPriceChange(Number(event.target.value))
-                  }
-                  className="w-20 rounded-sm border border-[#EEEEEE] accent-[#F5B301] px-2 py-1"
-                />
-                <span>إلى</span>
-                <input
-                  type="number"
-                  value={maxPrice}
-                  onChange={(event) =>
-                    handleMaxPriceChange(Number(event.target.value))
-                  }
-                  className="w-20 rounded-sm border border-[#EEEEEE] px-2 py-1"
-                />
-              </div>
-            </div>
-
-            <div className="rounded-sm border border-[#EEEEEE] bg-white p-4">
-              <h3 className="text-sm font-semibold text-[#333333]">اللون</h3>
-              <div className="mt-3 space-y-2 text-sm text-[#666666]">
-                {colors.map((color) => (
-                  <label key={color.id} className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="color"
-                      checked={colorId === color.id}
-                      onChange={() => handleColorChange(color.id)}
-                      className="peer sr-only"
-                    />
-
-                    {/* Radio circle */}
-                    <span className="h-4 w-4 aspect-square shrink-0 rounded-full border-2 border-[#D9D9D9] peer-checked:border-[#B47720] peer-checked:bg-[#B47720] flex items-center justify-center transition-colors">
-                      {/* White inner circle when checked */}
-                      <span className="h-2 w-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                    </span>
-                    <span
-                      className="inline-block h-5 w-5 aspect-square rounded-full border border-[#DDDDDD]"
-                      style={
-                        color.hex_code
-                          ? { backgroundColor: color.hex_code }
-                          : undefined
-                      }
-                    />
-                    <div className="flex flex-row items-center justify-between w-full">
-                      <span>{color.name ?? "—"}</span>
-                      <span className="text-xs text-[#999999]">
-                        ({colorCounts.get(color.id) ?? 0})
-                      </span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-sm border border-[#EEEEEE] bg-white p-4">
-              <h3 className="text-sm font-semibold text-[#333333]">التقييم</h3>
-              <div className="mt-3 space-y-2 text-sm text-[#666666]">
-                {[5, 4, 3, 2, 1].map((value) => (
+          <aside className="space-y-2 w-65">
+            <div className="w-65 flex flex-col items-center border rounded-sm border-[#EEEEEE]">
+              <div className="bg-white w-full p-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-[#333333]">
+                    الفئة
+                  </h3>
                   <button
-                    key={value}
                     type="button"
-                    onClick={() => handleRatingChange(value)}
-                    className="flex items-center gap-2 accent-[#F5B301]"
-                    aria-label={`${value} نجوم فأعلى`}
+                    className="text-xs text-[#B47720] accent-[#F5B301] outline-none"
+                    onClick={() => handleCategoryChange("all")}
                   >
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg
-                          key={star}
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          className={
-                            star <= value ? "text-[#F5B301]" : "text-[#E5E5E5]"
-                          }
-                          aria-hidden="true"
-                        >
-                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                        </svg>
-                      ))}
-                    </div>
-
-                    <span
-                      className={
-                        rating === value ? "text-[#333333] font-semibold" : ""
-                      }
-                    >
-                      {value} نجوم فأعلى
-                    </span>
+                    الكل
                   </button>
-                ))}
+                </div>
+                <div className="mt-3 space-y-2 text-sm text-[#666666]">
+                  {categories.map((category) => (
+                    <label
+                      key={category.id}
+                      className="flex items-center gap-3 cursor-pointer select-none"
+                    >
+                      <input
+                        type="radio"
+                        name="category"
+                        checked={categoryId === category.id}
+                        onChange={() =>
+                          handleCategoryChange(category.id ?? "all")
+                        }
+                        className="peer sr-only"
+                      />
+
+                      {/* Radio circle */}
+                      <span className="h-4 w-4 aspect-square shrink-0 rounded-full border-2 border-[#D9D9D9] peer-checked:border-[#B47720] peer-checked:bg-[#B47720] flex items-center justify-center transition-colors">
+                        {/* White inner circle when checked */}
+                        <span className="h-2 w-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                      </span>
+
+                      <div className="flex w-full items-center justify-between">
+                        <span className="text-sm text-[#666666]">
+                          {category.name ?? "—"}
+                        </span>
+
+                        <span className="text-xs text-[#999999]">
+                          ({categoryCounts.get(category.id ?? "") ?? 0})
+                        </span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t border-[#EEEEEE] w-4/5"></div>
+
+              <div className="bg-white w-full p-4">
+                <h3 className="text-sm font-semibold text-[#333333]">السعر</h3>
+                <div className="mt-3 flex items-center gap-2 text-xs text-[#666666]">
+                  <input
+                    type="number"
+                    value={minPrice}
+                    onChange={(event) =>
+                      handleMinPriceChange(Number(event.target.value))
+                    }
+                    className="w-20 rounded-sm border border-[#EEEEEE] accent-[#F5B301] px-2 py-1"
+                  />
+                  <span>إلى</span>
+                  <input
+                    type="number"
+                    value={maxPrice}
+                    onChange={(event) =>
+                      handleMaxPriceChange(Number(event.target.value))
+                    }
+                    className="w-20 rounded-sm border border-[#EEEEEE] px-2 py-1"
+                  />
+                </div>
+              </div>
+              <div className="border-t border-[#EEEEEE] w-4/5"></div>
+
+              <div className="bg-white w-full p-4">
+                <h3 className="text-sm font-semibold text-[#333333]">اللون</h3>
+                <div className="mt-3 space-y-2 text-sm text-[#666666]">
+                  {colors.map((color) => (
+                    <label key={color.id} className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="color"
+                        checked={colorId === color.id}
+                        onChange={() => handleColorChange(color.id)}
+                        className="peer sr-only"
+                      />
+
+                      {/* Radio circle */}
+                      <span className="h-4 w-4 aspect-square shrink-0 rounded-full border-2 border-[#D9D9D9] peer-checked:border-[#B47720] peer-checked:bg-[#B47720] flex items-center justify-center transition-colors">
+                        {/* White inner circle when checked */}
+                        <span className="h-2 w-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                      </span>
+                      <span
+                        className="inline-block h-5 w-5 aspect-square rounded-full border border-[#DDDDDD]"
+                        style={
+                          color.hex_code
+                            ? { backgroundColor: color.hex_code }
+                            : undefined
+                        }
+                      />
+                      <div className="flex flex-row items-center justify-between w-full">
+                        <span>{color.name ?? "—"}</span>
+                        <span className="text-xs text-[#999999]">
+                          ({colorCounts.get(color.id) ?? 0})
+                        </span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="border-t border-[#EEEEEE] w-4/5"></div>
+
+              <div className="bg-white w-full p-4">
+                <h3 className="text-sm font-semibold text-[#333333]">
+                  التقييم
+                </h3>
+                <div className="mt-3 space-y-2 text-sm text-[#666666]">
+                  {[5, 4, 3, 2, 1].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => handleRatingChange(value)}
+                      className="flex items-center gap-2 accent-[#F5B301]"
+                      aria-label={`${value} نجوم فأعلى`}
+                    >
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <svg
+                            key={star}
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className={
+                              star <= value
+                                ? "text-[#F5B301]"
+                                : "text-[#E5E5E5]"
+                            }
+                            aria-hidden="true"
+                          >
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                          </svg>
+                        ))}
+                      </div>
+
+                      <span
+                        className={
+                          rating === value ? "text-[#333333] font-semibold" : ""
+                        }
+                      >
+                        {value} نجوم فأعلى
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -481,8 +504,8 @@ export default function ShopPageShell({
                       y2="21.9802"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="#BDBDBD" />
-                      <stop offset="1" stop-color="#CACACA" />
+                      <stop stopColor="#BDBDBD" />
+                      <stop offset="1" stopColor="#CACACA" />
                     </linearGradient>
                     <linearGradient
                       id="paint1_linear_161_12654"
@@ -492,8 +515,8 @@ export default function ShopPageShell({
                       y2="21.9811"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="#D6DCE8" />
-                      <stop offset="1" stop-color="white" />
+                      <stop stopColor="#D6DCE8" />
+                      <stop offset="1" stopColor="white" />
                     </linearGradient>
                     <linearGradient
                       id="paint2_linear_161_12654"
@@ -503,8 +526,8 @@ export default function ShopPageShell({
                       y2="21.9806"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="#E7E7E7" />
-                      <stop offset="1" stop-color="white" />
+                      <stop stopColor="#E7E7E7" />
+                      <stop offset="1" stopColor="white" />
                     </linearGradient>
                     <linearGradient
                       id="paint3_linear_161_12654"
@@ -514,8 +537,8 @@ export default function ShopPageShell({
                       y2="21.9806"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="#E7E7E7" />
-                      <stop offset="1" stop-color="white" />
+                      <stop stopColor="#E7E7E7" />
+                      <stop offset="1" stopColor="white" />
                     </linearGradient>
                     <linearGradient
                       id="paint4_linear_161_12654"
@@ -525,8 +548,8 @@ export default function ShopPageShell({
                       y2="21.9806"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="#D6DCE8" />
-                      <stop offset="1" stop-color="white" />
+                      <stop stopColor="#D6DCE8" />
+                      <stop offset="1" stopColor="white" />
                     </linearGradient>
                     <linearGradient
                       id="paint5_linear_161_12654"
@@ -536,8 +559,8 @@ export default function ShopPageShell({
                       y2="21.9802"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="#D6DCE8" />
-                      <stop offset="1" stop-color="white" />
+                      <stop stopColor="#D6DCE8" />
+                      <stop offset="1" stopColor="white" />
                     </linearGradient>
                     <linearGradient
                       id="paint6_linear_161_12654"
@@ -547,8 +570,8 @@ export default function ShopPageShell({
                       y2="60.1876"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="#EAEAEA" />
-                      <stop offset="1" stop-color="#CACACA" />
+                      <stop stopColor="#EAEAEA" />
+                      <stop offset="1" stopColor="#CACACA" />
                     </linearGradient>
                     <linearGradient
                       id="paint7_linear_161_12654"
@@ -558,8 +581,8 @@ export default function ShopPageShell({
                       y2="106.63"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="#E2E2E2" />
-                      <stop offset="1" stop-color="#E7E7E7" />
+                      <stop stopColor="#E2E2E2" />
+                      <stop offset="1" stopColor="#E7E7E7" />
                     </linearGradient>
                     <linearGradient
                       id="paint8_linear_161_12654"
@@ -569,8 +592,8 @@ export default function ShopPageShell({
                       y2="87.9354"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="white" />
-                      <stop offset="1" stop-color="#F2F2F2" />
+                      <stop stopColor="white" />
+                      <stop offset="1" stopColor="#F2F2F2" />
                     </linearGradient>
                     <linearGradient
                       id="paint9_linear_161_12654"
@@ -580,8 +603,8 @@ export default function ShopPageShell({
                       y2="87.9354"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="white" />
-                      <stop offset="1" stop-color="#F2F2F2" />
+                      <stop stopColor="white" />
+                      <stop offset="1" stopColor="#F2F2F2" />
                     </linearGradient>
                     <linearGradient
                       id="paint10_linear_161_12654"
@@ -591,8 +614,8 @@ export default function ShopPageShell({
                       y2="87.9354"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="white" />
-                      <stop offset="1" stop-color="#F2F2F2" />
+                      <stop stopColor="white" />
+                      <stop offset="1" stopColor="#F2F2F2" />
                     </linearGradient>
                     <linearGradient
                       id="paint11_linear_161_12654"
@@ -602,8 +625,8 @@ export default function ShopPageShell({
                       y2="101.818"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="#CACACA" />
-                      <stop offset="1" stop-color="#CDCDCD" />
+                      <stop stopColor="#CACACA" />
+                      <stop offset="1" stopColor="#CDCDCD" />
                     </linearGradient>
                     <linearGradient
                       id="paint12_linear_161_12654"
@@ -613,13 +636,15 @@ export default function ShopPageShell({
                       y2="102.168"
                       gradientUnits="userSpaceOnUse"
                     >
-                      <stop stop-color="#F7F7F7" />
-                      <stop offset="1" stop-color="white" />
+                      <stop stopColor="#F7F7F7" />
+                      <stop offset="1" stopColor="white" />
                     </linearGradient>
                   </defs>
                 </svg>
 
-                <p className="text-[#666666] text-xl font-semibold ">لا توجد منتجات حتى الآن</p>
+                <p className="text-[#666666] text-xl font-semibold ">
+                  لا توجد منتجات حتى الآن
+                </p>
                 <p className="text-[#A5A5A5]">بحثك لم يطابق أي منتجات</p>
               </div>
             ) : view === "list" ? (

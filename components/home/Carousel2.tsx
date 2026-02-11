@@ -9,12 +9,15 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 
+import Link from "next/link";
+
 const slides = [
   {
-    title: "أفضل التخفيضات 2025",
+    title: "أفضل التخفيضات 2026",
     subtitle:
-      "عزاز للشنط والأحذية يقدم أحدث تشكيلات الحقائب من أرقى الماركات العالمية لهذا العام.",
+      "الازاز للشنط والأحذية يقدم أحدث تشكيلات الحقائب من أرقى الماركات العالمية لهذا العام.",
     button: "اكتشف المزيد",
+    target: "/shop/offer",
     image:
       "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=1920",
   },
@@ -23,6 +26,7 @@ const slides = [
     subtitle:
       "تصاميم جلدية فاخرة تجمع بين الكلاسيك والعصرية لتناسب جميع الأذواق.",
     button: "تسوق الآن",
+    target: "/shop",
     image:
       "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1920",
   },
@@ -30,10 +34,12 @@ const slides = [
     title: "مجموعة حصرية",
     subtitle: "اكتشفي أحدث صيحات الموضة في عالم الشنط الفاخرة بأسعار مميزة.",
     button: "استكشف المجموعة",
+    target: "/shop",
     image:
       "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1920",
   },
 ];
+
 
 export default function LuxuryBagsSwiper() {
   return (
@@ -70,9 +76,9 @@ export default function LuxuryBagsSwiper() {
                 <p className="max-w-3xl text-sm sm:text-base lg:text-lg opacity-90 mb-6 sm:mb-8">
                   {slide.subtitle}
                 </p>
-                <button className="bg-[#FFF] hover:bg-[#FFFFFFD1] text-[#333] px-6 py-2 text-sm sm:px-10 sm:py-3 sm:text-base rounded-sm font-semibold transition">
+                <Link href={slide.target} className="bg-[#FFF] hover:bg-[#FFFFFFD1] text-[#333] px-6 py-2 text-sm sm:px-10 sm:py-3 sm:text-base rounded-sm font-semibold transition">
                   {slide.button}
-                </button>
+                </Link>
               </div>
 
               {/* Brand

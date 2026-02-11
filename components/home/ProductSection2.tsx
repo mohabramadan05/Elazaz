@@ -84,7 +84,7 @@ export default function ProductSection() {
           </div>
 
           <Link
-            href="/shop/offers"
+            href="/shop/offer"
             className="
               flex items-center gap-2
               border border-[#B47720]

@@ -28,6 +28,9 @@ export default function Header() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [cartCount, setCartCount] = useState(0);
+  const [categories, setCategories] = useState<
+    Array<{ id: string; name: string | null; parent_id?: string | null }>
+  >([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -76,6 +79,36 @@ export default function Header() {
     };
   }, [supabase]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadCategories = async () => {
+      try {
+        const response = await fetch("/api/categories");
+        if (!response.ok) return;
+        const payload = (await response.json()) as Array<{
+          id: string;
+          name: string | null;
+          parent_id?: string | null;
+        }>;
+        if (!isMounted) return;
+        const rows = Array.isArray(payload) ? payload : [];
+        const topLevel = rows.filter(
+          (row) => row && row.name && !row.parent_id,
+        );
+        setCategories(topLevel);
+      } catch {
+        if (isMounted) setCategories([]);
+      }
+    };
+
+    loadCategories();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleUserClick = () => {
     if (!userEmail) {
       setAuthMode("login");
@@ -115,7 +148,7 @@ export default function Header() {
                 <p className="text-[#666666]">العربية - عربي</p>
               </div>
               <span className="h-3 border-l border-[#CCCCCC]"></span>
-              <Link href="/profile/wishlist" className="text-[#666666] hover:text-[#333333]">
+              <Link href="/profile?panel=wishlist" className="text-[#666666] hover:text-[#333333]">
                 المفضلة
               </Link>
               <span className="h-3 border-l border-[#CCCCCC]"></span>
@@ -231,26 +264,50 @@ export default function Header() {
 
         {/* Navigation Bar - Hidden on mobile */}
         <div className="hidden lg:flex bg-[#B47720] w-full py-2 items-center justify-center gap-8">
-          <p className="text-[#FFFFFF] flex items-center gap-1 cursor-pointer hover:opacity-80">
-            كل المنتجات
-            <ChevronDown className="w-4 h-4" />
-          </p>
-          <p className="text-[#FFFFFF] flex items-center gap-1 cursor-pointer hover:opacity-80">
-            حقائب اليد
-            <ChevronDown className="w-4 h-4" />
-          </p>
-          <p className="text-[#FFFFFF] flex items-center gap-1 cursor-pointer hover:opacity-80">
-            جديدنا
-            <ChevronDown className="w-4 h-4" />
-          </p>
-          <p className="text-[#FFFFFF] flex items-center gap-1 cursor-pointer hover:opacity-80">
-            العروض
-            <ChevronDown className="w-4 h-4" />
-          </p>
-          <p className="text-[#FFFFFF] flex items-center gap-1 cursor-pointer hover:opacity-80">
-            الأكثر مبيعًا
-            <ChevronDown className="w-4 h-4" />
-          </p>
+          {categories.length > 0 ? (
+            <>
+              <Link
+                href="/shop"
+                className="text-[#FFFFFF] flex items-center gap-1 cursor-pointer hover:opacity-80"
+              >
+                كل المنتجات
+                <ChevronDown className="w-4 h-4" />
+              </Link>
+              {categories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={`/shop/category/${category.id}`}
+                  className="text-[#FFFFFF] flex items-center gap-1 cursor-pointer hover:opacity-80"
+                >
+                  {category.name}
+                  <ChevronDown className="w-4 h-4" />
+                </Link>
+              ))}
+            </>
+          ) : (
+            <>
+              <p className="text-[#FFFFFF] flex items-center gap-1 cursor-pointer hover:opacity-80">
+                كل المنتجات
+                <ChevronDown className="w-4 h-4" />
+              </p>
+              <p className="text-[#FFFFFF] flex items-center gap-1 cursor-pointer hover:opacity-80">
+                حقائب اليد
+                <ChevronDown className="w-4 h-4" />
+              </p>
+              <p className="text-[#FFFFFF] flex items-center gap-1 cursor-pointer hover:opacity-80">
+                جديدنا
+                <ChevronDown className="w-4 h-4" />
+              </p>
+              <p className="text-[#FFFFFF] flex items-center gap-1 cursor-pointer hover:opacity-80">
+                العروض
+                <ChevronDown className="w-4 h-4" />
+              </p>
+              <p className="text-[#FFFFFF] flex items-center gap-1 cursor-pointer hover:opacity-80">
+                الأكثر مبيعًا
+                <ChevronDown className="w-4 h-4" />
+              </p>
+            </>
+          )}
         </div>
 
         {/* Mobile Search Bar */}
@@ -310,26 +367,50 @@ export default function Header() {
 
             {/* Navigation Links */}
             <div className="p-4 space-y-2">
-              <div className="py-3 border-b cursor-pointer hover:bg-gray-50 flex items-center justify-between">
-                <span className="text-[#333333]">كل المنتجات</span>
-                <ChevronDown className="w-4 h-4 text-[#666666]" />
-              </div>
-              <div className="py-3 border-b cursor-pointer hover:bg-gray-50 flex items-center justify-between">
-                <span className="text-[#333333]">حقائب اليد</span>
-                <ChevronDown className="w-4 h-4 text-[#666666]" />
-              </div>
-              <div className="py-3 border-b cursor-pointer hover:bg-gray-50 flex items-center justify-between">
-                <span className="text-[#333333]">جديدنا</span>
-                <ChevronDown className="w-4 h-4 text-[#666666]" />
-              </div>
-              <div className="py-3 border-b cursor-pointer hover:bg-gray-50 flex items-center justify-between">
-                <span className="text-[#333333]">العروض</span>
-                <ChevronDown className="w-4 h-4 text-[#666666]" />
-              </div>
-              <div className="py-3 border-b cursor-pointer hover:bg-gray-50 flex items-center justify-between">
-                <span className="text-[#333333]">الأكثر مبيعًا</span>
-                <ChevronDown className="w-4 h-4 text-[#666666]" />
-              </div>
+              {categories.length > 0 ? (
+                <>
+                  <Link
+                    href="/shop"
+                    className="py-3 border-b cursor-pointer hover:bg-gray-50 flex items-center justify-between"
+                  >
+                    <span className="text-[#333333]">كل المنتجات</span>
+                    <ChevronDown className="w-4 h-4 text-[#666666]" />
+                  </Link>
+                  {categories.map((category) => (
+                    <Link
+                      key={category.id}
+                      href={`/shop/category/${category.id}`}
+                      className="py-3 border-b cursor-pointer hover:bg-gray-50 flex items-center justify-between"
+                    >
+                      <span className="text-[#333333]">{category.name}</span>
+                      <ChevronDown className="w-4 h-4 text-[#666666]" />
+                    </Link>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <div className="py-3 border-b cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+                    <span className="text-[#333333]">كل المنتجات</span>
+                    <ChevronDown className="w-4 h-4 text-[#666666]" />
+                  </div>
+                  <div className="py-3 border-b cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+                    <span className="text-[#333333]">حقائب اليد</span>
+                    <ChevronDown className="w-4 h-4 text-[#666666]" />
+                  </div>
+                  <div className="py-3 border-b cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+                    <span className="text-[#333333]">جديدنا</span>
+                    <ChevronDown className="w-4 h-4 text-[#666666]" />
+                  </div>
+                  <div className="py-3 border-b cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+                    <span className="text-[#333333]">العروض</span>
+                    <ChevronDown className="w-4 h-4 text-[#666666]" />
+                  </div>
+                  <div className="py-3 border-b cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+                    <span className="text-[#333333]">الأكثر مبيعًا</span>
+                    <ChevronDown className="w-4 h-4 text-[#666666]" />
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Additional Links */}

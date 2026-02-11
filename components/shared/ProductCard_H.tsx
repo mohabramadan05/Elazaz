@@ -136,15 +136,15 @@ export default function ProductCard({ product }: Props) {
           {hasDiscount ? (
             <div className="mt-0.5 flex items-center justify-start gap-2">
               <span className="text-base font-semibold text-[#F55157] sm:text-lg">
-                {discountPrice} ر.س
+                {discountPrice} ج.م
               </span>
               <span className="text-xs text-[#9A9A9A] line-through sm:text-base">
-                {basePrice} ر.س
+                {basePrice} ج.م
               </span>
             </div>
           ) : (
             <p className="mt-0.5 text-base font-semibold text-[#F55157] text-right sm:text-lg">
-              {price} ر.س
+              {price} ج.م
             </p>
           )}
         </div>

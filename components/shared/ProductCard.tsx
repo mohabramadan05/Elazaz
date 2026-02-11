@@ -107,7 +107,7 @@ export default function ProductCard({ product }: Props) {
 
   return (
     <div
-      className="group relative h-full w-full max-w-80 sm:max-w-85 flex flex-col items-left bg-[#FFFFFF] rounded-sm shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B47720]/30"
+      className="group relative  border border-[#EEEEEE] h-full w-full max-w-80 sm:max-w-85 flex flex-col items-left bg-[#FFFFFF] rounded-sm shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B47720]/30"
       role={productHref ? "link" : undefined}
       tabIndex={productHref ? 0 : -1}
       onClick={handleCardClick}
@@ -135,15 +135,15 @@ export default function ProductCard({ product }: Props) {
         {hasDiscount ? (
           <div className="mt-0.5 flex items-center justify-start gap-2">
             <span className="text-base font-semibold text-[#F55157] sm:text-lg">
-              {discountPrice} ر.س
+              {discountPrice} ج.م
             </span>
             <span className="text-xs text-[#9A9A9A] line-through sm:text-base">
-              {basePrice} ر.س
+              {basePrice} ج.م
             </span>
           </div>
         ) : (
           <p className="mt-0.5 text-base font-semibold text-[#F55157] text-right sm:text-lg">
-            {price} ر.س
+            {price} ج.م
           </p>
         )}
       </div>

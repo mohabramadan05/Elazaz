@@ -1,4 +1,38 @@
+"use client";
+import { useState } from "react";
+
 export default function NewsLetter() {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const handleSubmit = async () => {
+    if (!email.trim()) {
+      setMessage("يرجى إدخال البريد الإلكتروني.");
+      return;
+    }
+    setIsSubmitting(true);
+    setMessage(null);
+    try {
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const payload = (await response.json()) as { error?: string };
+      if (!response.ok) {
+        setMessage(payload.error || "تعذر الاشتراك. حاول مرة أخرى.");
+        return;
+      }
+      setEmail("");
+      setMessage("تم الاشتراك بنجاح.");
+    } catch {
+      setMessage("حدث خطأ أثناء الاشتراك. حاول لاحقًا.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="bg-[#F8F8F8] p-5 flex flex-col lg:flex-row justify-center gap-6 items-start lg:items-end">
       <div className="flex flex-col sm:flex-row justify-center items-start sm:items-center gap-4">
@@ -36,10 +70,20 @@ export default function NewsLetter() {
           type="email"
           className="rounded-md border border-[#EEE] bg-white outline-0 w-full py-3 px-2"
           placeholder="ادخل البريد الالكترونى"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
         />
+        {message ? (
+          <p className="text-xs text-[#666666]">{message}</p>
+        ) : null}
       </div>
-      <button className="text-white bg-[#B47720] rounded-md px-6 py-3 w-full sm:w-auto">
-        إشتراك
+      <button
+        type="button"
+        onClick={handleSubmit}
+        disabled={isSubmitting}
+        className="text-white bg-[#B47720] rounded-md px-6 py-3 w-full sm:w-auto disabled:opacity-60"
+      >
+        {isSubmitting ? "جاري الاشتراك..." : "إشتراك"}
       </button>
     </div>
   );

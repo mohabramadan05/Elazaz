@@ -1,27 +1,24 @@
-﻿import ShopPageShell from "@/components/shop/ShopPageShell";
+import ShopPageShell from "@/components/shop/ShopPageShell";
 import { fetchProducts } from "@/lib/data/products";
 import { fetchCategories } from "@/lib/data/categories";
 import { fetchColors } from "@/lib/data/colors";
 
-type PageProps = {
-  params: Promise<{ categoryId: string }>;
-};
-
-export default async function ShopCategoryPage({ params }: PageProps) {
-  const { categoryId } = await params;
+export default async function ShopOfferPage() {
   const [products, categories, colors] = await Promise.all([
-    fetchProducts({ categoryId }),
+    fetchProducts(),
     fetchCategories(),
     fetchColors(),
   ]);
 
+  const offerProducts = products.filter(
+    (product) => (product.variant_discount_price ?? 0) > 0,
+  );
 
   return (
     <ShopPageShell
-      products={products}
+      products={offerProducts}
       categories={categories}
       colors={colors}
-      initialCategoryId={categoryId}
     />
   );
 }

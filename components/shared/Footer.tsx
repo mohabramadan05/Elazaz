@@ -33,13 +33,13 @@ export default function Header() {
               <Link href="/profile">
                 <li className="hover:text-[#C58A3A]">» حسابي</li>
               </Link>
-              <Link href="/profile/orders">
+              <Link href="/profile?panel=orders">
                 <li className="hover:text-[#C58A3A]">» طلباتي</li>
               </Link>
               <Link href="/profile/cart">
                 <li className="hover:text-[#C58A3A]">» سلة المشتريات</li>
               </Link>
-              <Link href="/profile/wishlist">
+              <Link href="/profile?panel=wishlist">
                 <li className="hover:text-[#C58A3A]">» المفضلة</li>
               </Link>
             </ul>
