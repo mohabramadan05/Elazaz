@@ -4,8 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSnapchatGhost,
   faInstagram,
-  faTwitter,
-  faFacebookF,
 } from "@fortawesome/free-brands-svg-icons";
 import Link from "next/link";
 
@@ -20,7 +18,7 @@ export default function Header() {
           <div className="xl:col-span-1">
             <h3 className="font-semibold text-lg mb-4">عن متجرنا</h3>
             <p className="text-sm leading-relaxed text-[#666]">
-              عزاز هو متجر رائد متخصص في بيع الحقائب والأحذية الفاخرة. اكتشف
+              الأزاز هو متجر رائد متخصص في بيع الحقائب والأحذية الفاخرة. اكتشف
               أحدث التشكيلات واستمتع بتجربة تسوق فريدة مع عروض حصرية وخصومات لا
               تقبل المنافسة.
             </p>
@@ -49,7 +47,7 @@ export default function Header() {
           <div>
             <h3 className="font-semibold text-lg mb-4">روابط مهمة</h3>
             <ul className="flex flex-col gap-3 text-sm text-[#666]">
-              <Link href="/contact-us">
+              <Link href="/about-us">
                 <li className="hover:text-[#C58A3A]">» من نحن</li>
               </Link>
               <Link href="/policies/privacy-policy">
@@ -68,19 +66,19 @@ export default function Header() {
           <div>
             <h3 className="font-semibold text-lg mb-4">تواصل معنا</h3>
             <ul className="flex flex-col gap-3 text-sm text-[#666]">
-              <Link href="/">
+              <Link href="https://wa.me/201027043700">
                 <li className="hover:text-[#C58A3A]">
-                  » واتساب : <span dir="ltr">+966558441497</span>
+                  » واتساب : <span dir="ltr">+201027043700</span>
                 </li>
               </Link>
-              <Link href="/">
+              <Link href="tel:+201027043700">
                 <li className="hover:text-[#C58A3A]">
-                  » موبايل : <span dir="ltr">+966558441497</span>
+                  » موبايل : <span dir="ltr">+201027043700</span>
                 </li>
               </Link>
-              <Link href="/">
+              <Link href="mailto:elazazeg@gmail.com">
                 <li className="hover:text-[#C58A3A]">
-                  » البريد : https://elazaz.site
+                  » البريد : elazazeg@gmail.com
                 </li>
               </Link>
             </ul>
@@ -90,18 +88,20 @@ export default function Header() {
           <div>
             <h3 className="font-semibold text-lg mb-4">تابعنا على</h3>
             <div className="flex gap-3 flex-wrap">
-              <div className="w-10 h-10 flex items-center justify-center rounded-full border border-[#EEE] text-[#999] hover:text-[#C58A3A] hover:border-[#C58A3A] transition">
+              <Link
+                href={
+                  "https://www.snapchat.com/add/elazazazeg?share_id=oYni9WPDQguO4FlmJtPPKw&locale=en_EG"
+                }
+                className="w-10 h-10 flex items-center justify-center rounded-full border border-[#EEE] text-[#999] hover:text-[#C58A3A] hover:border-[#C58A3A] transition"
+              >
                 <FontAwesomeIcon icon={faSnapchatGhost} />
-              </div>
-              <div className="w-10 h-10 flex items-center justify-center rounded-full border border-[#EEE] text-[#999] hover:text-[#C58A3A] hover:border-[#C58A3A] transition">
+              </Link>
+              <Link
+                href="https://www.instagram.com/el_azaz6?igsh=MTF0enl1cHFubnM5dg%3D%3D&utm_source=qr"
+                className="w-10 h-10 flex items-center justify-center rounded-full border border-[#EEE] text-[#999] hover:text-[#C58A3A] hover:border-[#C58A3A] transition"
+              >
                 <FontAwesomeIcon icon={faInstagram} />
-              </div>
-              <div className="w-10 h-10 flex items-center justify-center rounded-full border border-[#EEE] text-[#999] hover:text-[#C58A3A] hover:border-[#C58A3A] transition">
-                <FontAwesomeIcon icon={faTwitter} />
-              </div>
-              <div className="w-10 h-10 flex items-center justify-center rounded-full border border-[#EEE] text-[#999] hover:text-[#C58A3A] hover:border-[#C58A3A] transition">
-                <FontAwesomeIcon icon={faFacebookF} />
-              </div>
+              </Link>
             </div>
           </div>
         </div>
@@ -120,7 +120,7 @@ export default function Header() {
             alt="vat"
             className="h-6 w-auto"
           />
-          <p className="pe-0 lg:pe-5">123124123123 : الرقم الضريبي</p>
+          <p className="pe-0 lg:pe-5">757-426-174 : الرقم الضريبي</p>
           <Image
             src="/assets/visa.png"
             width={64}

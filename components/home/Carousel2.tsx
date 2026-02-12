@@ -15,7 +15,7 @@ const slides = [
   {
     title: "أفضل التخفيضات 2026",
     subtitle:
-      "الازاز للشنط والأحذية يقدم أحدث تشكيلات الحقائب من أرقى الماركات العالمية لهذا العام.",
+      "الأزاز للشنط والأحذية يقدم أحدث تشكيلات الحقائب من أرقى الماركات العالمية لهذا العام.",
     button: "اكتشف المزيد",
     target: "/shop/offer",
     image:
@@ -91,11 +91,11 @@ export default function LuxuryBagsSwiper() {
       </Swiper>
 
       {/* Navigation */}
-      <button className="lux-prev absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[#EEEEEE] hover:bg-white/30 backdrop-blur flex items-center justify-center">
+      <button className="lux-prev absolute left-3 sm:left-6 top-2/3 sm:top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[#EEEEEE] hover:bg-white/30 backdrop-blur flex items-center justify-center">
         <ChevronLeft className="text-white" />
       </button>
 
-      <button className="lux-next absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[#EEEEEE] hover:bg-white/30 backdrop-blur flex items-center justify-center">
+      <button className="lux-next absolute right-3 sm:right-6 top-2/3 sm:top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[#EEEEEE] hover:bg-white/30 backdrop-blur flex items-center justify-center">
         <ChevronRight className="text-white" />
       </button>
 

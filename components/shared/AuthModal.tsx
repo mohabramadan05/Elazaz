@@ -81,6 +81,11 @@ export default function AuthModal({
       return;
     }
 
+    if (isSignup && password.length < 8) {
+      setStatus("يجب ان تكون كلمة المرور اكثر من 8 رموز");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       if (isSignup) {
@@ -184,9 +189,9 @@ export default function AuthModal({
                   }
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="h-5 w-5" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-5 w-5" />
                   )}
                 </button>
                 <input
@@ -212,9 +217,9 @@ export default function AuthModal({
                     }
                   >
                     {showConfirm ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </button>
                   <input

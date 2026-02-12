@@ -107,7 +107,7 @@ export default function ProductCard({ product }: Props) {
 
   return (
     <div
-      className="group relative h-full w-full flex flex-row items-left border border-[#EEEEEE] bg-[#FFFFFF] rounded-sm shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B47720]/30"
+      className="group relative h-full w-full flex flex-row items-start border border-[#EEEEEE] bg-[#FFFFFF] rounded-sm shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B47720]/30"
       role={productHref ? "link" : undefined}
       tabIndex={productHref ? 0 : -1}
       onClick={handleCardClick}
@@ -119,23 +119,32 @@ export default function ProductCard({ product }: Props) {
         alt={title}
         width={500}
         height={500}
-        className="h-57 w-57 aspect-square object-cover"
+        className="h-40 w-40 sm:h-57 sm:w-57 aspect-square object-cover"
       />
-      <div className="flex-1 flex flex-col justify-between p-2 items-start">
-        <div className="px-3 py-2 flex flex-col gap-1">
-          <p className="text-xs font-medium text-[#B47720] text-right sm:text-sm">
+      <div className="flex-1 min-w-0 flex flex-col justify-between p-2 items-start">
+        <div className="px-3 py-2 flex flex-col gap-1 min-w-0">
+          <p className="text-xs font-medium text-[#B47720] text-right sm:text-sm truncate">
             {category}
           </p>
-          <h3 className="mt-1 text-sm font-semibold text-[#333333] text-right sm:text-md">
+          <h3
+            className="mt-1 text-xs font-semibold text-[#333333] text-right sm:text-md"
+            title={title}
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
             {title}
           </h3>
-          <h4 className="mt-1 text-xs text-[#666666] text-right sm:text-sm">
+          <h3 className="mt-1 text-xs text-[#666666] text-right sm:text-sm truncate">
             {color}
-          </h4>
+          </h3>
 
           {hasDiscount ? (
             <div className="mt-0.5 flex items-center justify-start gap-2">
-              <span className="text-base font-semibold text-[#F55157] sm:text-lg">
+              <span className="text-sm font-semibold text-[#F55157] sm:text-lg">
                 {discountPrice} ج.م
               </span>
               <span className="text-xs text-[#9A9A9A] line-through sm:text-base">
@@ -143,12 +152,12 @@ export default function ProductCard({ product }: Props) {
               </span>
             </div>
           ) : (
-            <p className="mt-0.5 text-base font-semibold text-[#F55157] text-right sm:text-lg">
+            <p className="mt-0.5 text-sm font-semibold text-[#F55157] text-right sm:text-lg">
               {price} ج.م
             </p>
           )}
         </div>
-        <div className="mt-auto mb-2 px-2 w-full flex flex-row items-center justify-between gap-2">
+        <div className="mt-auto mb-2 px-2 w-full flex flex-row items-center justify-between gap-2 flex-wrap">
           <button
             type="button"
             onClick={(event) => {
@@ -156,7 +165,7 @@ export default function ProductCard({ product }: Props) {
               handleAddToCart();
             }}
             disabled={!product.variant_id || isAdding}
-            className={`flex-1 flex justify-center items-center gap-1.5 h-10 border border-[#EEEEEE] text-xs font-medium rounded-sm transition hover:bg-[#B47720] hover:text-white hover:border-[#B47720] sm:h-12 sm:text-sm ${
+            className={`flex-1 flex justify-center items-center gap-1.5 h-9 border border-[#EEEEEE] text-xs font-medium rounded-sm transition hover:bg-[#B47720] hover:text-white hover:border-[#B47720] sm:h-12 sm:text-sm ${
               isAdding ? "opacity-70 cursor-not-allowed" : ""
             }`}
           >
@@ -180,7 +189,7 @@ export default function ProductCard({ product }: Props) {
                 fill="currentColor"
               />
             </svg>
-            <p className="font-semibold"> أضف للسلة</p>
+            <p className="text-xs sm:text-base font-semibold"> أضف للسلة</p>
           </button>
           <button
             type="button"
@@ -190,7 +199,7 @@ export default function ProductCard({ product }: Props) {
             }}
             disabled={!product.variant_id || isToggling}
             aria-pressed={isWishlisted}
-            className={`h-10 w-10 border rounded-sm flex items-center justify-center transition sm:h-12 sm:w-12 ${
+            className={`h-9 w-10 border rounded-sm flex items-center justify-center transition sm:h-12 sm:w-12 ${
               isWishlisted
                 ? "bg-[#FDE7EA] text-[#E11D48] border-[#FBCBD3]"
                 : "border-[#EEEEEE] text-[#666666] hover:bg-[#FDE7EA] hover:text-[#E11D48] hover:border-[#FBCBD3]"

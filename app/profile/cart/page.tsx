@@ -159,7 +159,7 @@ export default function CartPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex gap-12 justify-end items-center">
+                      <div className="flex gap-8 md:gap-12 justify-end items-center">
                         <div className="flex items-center rounded-sm border border-[#EEEEEE] px-3 py-2 text-sm text-[#666666]">
                           <button
                             type="button"
@@ -177,6 +177,7 @@ export default function CartPage() {
                           <span className="min-w-8 text-center text-sm text-[#333333]">
                             {item.quantity ?? 1}
                           </span>
+
                           <span className=" border border-[#EEEEEE] py-3 mx-2"></span>
                           <button
                             type="button"
@@ -192,7 +193,7 @@ export default function CartPage() {
                             −
                           </button>
                         </div>
-                        <div className="text-base font-semibold text-[#333333]">
+                        <div className="text-sm md:text-base font-semibold text-[#333333]">
                           {formatPrice(lineTotal)} ج.م
                         </div>
                         <button

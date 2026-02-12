@@ -165,7 +165,8 @@ export default function ProfilePage() {
   }, [activePanel, wishlistLoaded]);
 
   useEffect(() => {
-    if (!userId || activePanel !== "notifications" || notificationsLoaded) return;
+    if (!userId || activePanel !== "notifications" || notificationsLoaded)
+      return;
     let isMounted = true;
     const loadNotifications = async () => {
       setNotificationsLoading(true);
@@ -547,7 +548,47 @@ export default function ProfilePage() {
           <span className="text-[#B47720]">حسابي</span>
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_280px]">
+        <div className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr]">
+          <aside className="h-fit rounded-sm border border-[#EEEEEE] bg-white p-4 shadow-sm">
+            <div className="space-y-1 text-sm text-[#444444]">
+              {panelLinks.map((link) => {
+                const isActive = activePanel === link.key;
+                const count =
+                  link.key === "notifications"
+                    ? unreadNotificationsCount
+                    : link.count;
+                return (
+                  <button
+                    key={link.key}
+                    type="button"
+                    onClick={() => handlePanelChange(link.key)}
+                    className={`flex w-full items-center justify-between rounded-sm px-3 py-2 transition ${
+                      isActive
+                        ? "bg-[#F6F0E6] text-[#B47720]"
+                        : "hover:bg-[#F8F8F8]"
+                    }`}
+                  >
+                    <span>{link.label}</span>
+                    {typeof count === "number" && count > 0 ? (
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#E11D48] text-[10px] font-semibold text-white">
+                        {count}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="flex w-full items-center justify-between rounded-sm px-3 py-2 text-[#E11D48] hover:bg-[#FFF1F2] disabled:opacity-60"
+              >
+                <span>
+                  {isSigningOut ? "جاري تسجيل الخروج..." : "تسجيل خروج"}
+                </span>
+              </button>
+            </div>
+          </aside>{" "}
           <div className="space-y-3">
             {activePanel === "wishlist" && (
               <>
@@ -560,38 +601,42 @@ export default function ProfilePage() {
                     لا توجد منتجات في المفضلة حالياً.
                   </div>
                 ) : (
-                  wishlistItems.map((item) => {
-                    const unitPrice = getUnitPrice(item);
-                    const image = item.main_image_url || "/assets/logo.png";
-                    return (
-                      <Link key={item.id} href={"/product/" + item.variant_id}>
-                        <div
+                  <div className="grid gap-3">
+                    {wishlistItems.map((item) => {
+                      const unitPrice = getUnitPrice(item);
+                      const image = item.main_image_url || "/assets/logo.png";
+                      return (
+                        <Link
                           key={item.id}
-                          className="rounded-sm border border-[#EEEEEE] bg-white px-4 py-3 shadow-sm"
+                          href={"/product/" + item.variant_id}
                         >
-                          <div className="flex items-center justify-between gap-4">
-                            <Image
-                              src={image}
-                              alt={item.product_name ?? "Product"}
-                              width={80}
-                              height={80}
-                              className="h-20 w-20 rounded-sm border border-[#EEEEEE] object-cover"
-                            />
-                            <div className="flex flex-1 items-center justify-between gap-4">
-                              <div className="text-right">
-                                <p className="text-sm font-semibold text-[#333333]">
-                                  {item.product_name ?? "منتج"}{" "}
-                                  {(item.color_name || item.size_name) && (
-                                    <span>
-                                      {item.color_name ?? ""}
-                                      {item.color_name && item.size_name
-                                        ? " , "
-                                        : ""}
-                                      {item.size_name ?? ""}
-                                    </span>
-                                  )}
-                                </p>
-                                {/* {(item.color_name || item.size_name) && (
+                          <div
+                            key={item.id}
+                            className="rounded-sm border border-[#EEEEEE] bg-white px-4 py-3 shadow-sm"
+                          >
+                            <div className="flex items-center justify-between gap-4">
+                              <Image
+                                src={image}
+                                alt={item.product_name ?? "Product"}
+                                width={80}
+                                height={80}
+                                className="h-20 w-20 rounded-sm border border-[#EEEEEE] object-cover"
+                              />
+                              <div className="flex flex-1 items-center justify-between gap-4">
+                                <div className="text-right">
+                                  <p className="text-sm font-semibold text-[#333333]">
+                                    {item.product_name ?? "منتج"}{" "}
+                                    {(item.color_name || item.size_name) && (
+                                      <span>
+                                        {item.color_name ?? ""}
+                                        {item.color_name && item.size_name
+                                          ? " , "
+                                          : ""}
+                                        {item.size_name ?? ""}
+                                      </span>
+                                    )}
+                                  </p>
+                                  {/* {(item.color_name || item.size_name) && (
                                 <p className="text-xs text-[#888888]">
                                   {item.color_name
                                     ? item.color_name
@@ -602,37 +647,38 @@ export default function ProfilePage() {
                                     : ""}
                                 </p>
                               )} */}
-                                <p className="text-xs text-[#888888]">
-                                  {formatPrice(unitPrice)} ج.م
-                                </p>
-                              </div>
+                                  <p className="text-xs text-[#888888]">
+                                    {formatPrice(unitPrice)} ج.م
+                                  </p>
+                                </div>
 
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveWishlistItem(item)}
-                                disabled={wishlistUpdatingId === item.id}
-                                className="h-8 w-8 rounded-full flex justify-center items-center bg-[#F8F8F8] text-[#444444] hover:bg-[#B47720] hover:text-[#FFFFFF] disabled:opacity-60"
-                                aria-label="حذف"
-                              >
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 12 12"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="text-current"
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveWishlistItem(item)}
+                                  disabled={wishlistUpdatingId === item.id}
+                                  className="h-8 w-8 rounded-full flex justify-center items-center bg-[#F8F8F8] text-[#444444] hover:bg-[#B47720] hover:text-[#FFFFFF] disabled:opacity-60"
+                                  aria-label="حذف"
                                 >
-                                  <path
-                                    d="M2.19526 3.13807C1.93491 2.87772 1.93491 2.45561 2.19526 2.19526C2.45562 1.93491 2.87772 1.93491 3.13807 2.19526L5.99999 5.05718L8.86189 2.19526C9.12225 1.93491 9.54438 1.93491 9.80473 2.19526C10.0651 2.45561 10.0651 2.87772 9.80473 3.13807L6.94279 5.99999L9.80473 8.86189C10.0651 9.12225 10.0651 9.54438 9.80473 9.80473C9.54438 10.0651 9.12225 10.0651 8.86189 9.80473L5.99999 6.94279L3.13807 9.80473C2.87772 10.0651 2.45562 10.0651 2.19526 9.80473C1.93491 9.54438 1.93491 9.12225 2.19526 8.86189L5.05718 5.99999L2.19526 3.13807Z"
-                                    fill="currentColor"
-                                  />
-                                </svg>
-                              </button>
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 12 12"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="text-current"
+                                  >
+                                    <path
+                                      d="M2.19526 3.13807C1.93491 2.87772 1.93491 2.45561 2.19526 2.19526C2.45562 1.93491 2.87772 1.93491 3.13807 2.19526L5.99999 5.05718L8.86189 2.19526C9.12225 1.93491 9.54438 1.93491 9.80473 2.19526C10.0651 2.45561 10.0651 2.87772 9.80473 3.13807L6.94279 5.99999L9.80473 8.86189C10.0651 9.12225 10.0651 9.54438 9.80473 9.80473C9.54438 10.0651 9.12225 10.0651 8.86189 9.80473L5.99999 6.94279L3.13807 9.80473C2.87772 10.0651 2.45562 10.0651 2.19526 9.80473C1.93491 9.54438 1.93491 9.12225 2.19526 8.86189L5.05718 5.99999L2.19526 3.13807Z"
+                                      fill="currentColor"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </Link>
-                    );
-                  })
+                        </Link>
+                      );
+                    })}
+                  </div>
                 )}
               </>
             )}
@@ -964,47 +1010,6 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
-
-          <aside className="h-fit rounded-sm border border-[#EEEEEE] bg-white p-4 shadow-sm">
-            <div className="space-y-1 text-sm text-[#444444]">
-              {panelLinks.map((link) => {
-                const isActive = activePanel === link.key;
-                const count =
-                  link.key === "notifications"
-                    ? unreadNotificationsCount
-                    : link.count;
-                return (
-                  <button
-                    key={link.key}
-                    type="button"
-                    onClick={() => handlePanelChange(link.key)}
-                    className={`flex w-full items-center justify-between rounded-sm px-3 py-2 transition ${
-                      isActive
-                        ? "bg-[#F6F0E6] text-[#B47720]"
-                        : "hover:bg-[#F8F8F8]"
-                    }`}
-                  >
-                    <span>{link.label}</span>
-                    {typeof count === "number" && count > 0 ? (
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#E11D48] text-[10px] font-semibold text-white">
-                        {count}
-                      </span>
-                    ) : null}
-                  </button>
-                );
-              })}
-              <button
-                type="button"
-                onClick={handleSignOut}
-                disabled={isSigningOut}
-                className="flex w-full items-center justify-between rounded-sm px-3 py-2 text-[#E11D48] hover:bg-[#FFF1F2] disabled:opacity-60"
-              >
-                <span>
-                  {isSigningOut ? "جاري تسجيل الخروج..." : "تسجيل خروج"}
-                </span>
-              </button>
-            </div>
-          </aside>
         </div>
       </div>
     </section>

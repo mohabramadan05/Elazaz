@@ -115,7 +115,7 @@ export default function ProductSection() {
               prevEl: ".product-prev",
             }}
             spaceBetween={12}
-            slidesPerView={2}
+            slidesPerView={1.3}
             breakpoints={{
               640: { slidesPerView: 2 },
               768: { slidesPerView: 3 },

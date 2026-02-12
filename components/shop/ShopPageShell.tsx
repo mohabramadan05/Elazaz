@@ -43,6 +43,7 @@ export default function ShopPageShell({
   const [colorId, setColorId] = useState("all");
   const [rating, setRating] = useState(0);
   const [page, setPage] = useState(1);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const pageSize = 24;
 
   const priceStats = useMemo(() => {
@@ -169,6 +170,172 @@ export default function ShopPageShell({
     setPage(safePage);
   };
 
+  const renderFilterPanel = (namePrefix: "desktop" | "mobile") => (
+    <div className="space-y-2 w-full">
+      <div className="flex flex-col items-center border rounded-sm border-[#EEEEEE]">
+        <div className="bg-white w-full p-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-[#333333]">الفئة</h3>
+            <button
+              type="button"
+              className="text-xs text-[#B47720] accent-[#F5B301] outline-none"
+              onClick={() => handleCategoryChange("all")}
+            >
+              الكل
+            </button>
+          </div>
+          <div className="mt-3 space-y-2 text-sm text-[#666666]">
+            {categories.map((category) => (
+              <label
+                key={category.id}
+                className="flex items-center gap-3 cursor-pointer select-none"
+              >
+                <input
+                  type="radio"
+                  name={`category-${namePrefix}`}
+                  checked={categoryId === category.id}
+                  onChange={() => handleCategoryChange(category.id ?? "all")}
+                  className="peer sr-only"
+                />
+
+                {/* Radio circle */}
+                <span className="h-4 w-4 aspect-square shrink-0 rounded-full border-2 border-[#D9D9D9] peer-checked:border-[#B47720] peer-checked:bg-[#B47720] flex items-center justify-center transition-colors">
+                  {/* White inner circle when checked */}
+                  <span className="h-2 w-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                </span>
+
+                <div className="flex w-full items-center justify-between">
+                  <span className="text-sm text-[#666666]">
+                    {category.name ?? "—"}
+                  </span>
+
+                  <span className="text-xs text-[#999999]">
+                    ({categoryCounts.get(category.id ?? "") ?? 0})
+                  </span>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="border-t border-[#EEEEEE] w-4/5"></div>
+
+        <div className="bg-white w-full p-4">
+          <h3 className="text-sm font-semibold text-[#333333]">السعر</h3>
+          <div className="mt-3 flex items-center gap-2 text-xs text-[#666666]">
+            <input
+              type="number"
+              value={minPrice}
+              onChange={(event) =>
+                handleMinPriceChange(Number(event.target.value))
+              }
+              className="w-20 rounded-sm border border-[#EEEEEE] accent-[#F5B301] px-2 py-1"
+            />
+            <span>إلى</span>
+            <input
+              type="number"
+              value={maxPrice}
+              onChange={(event) =>
+                handleMaxPriceChange(Number(event.target.value))
+              }
+              className="w-20 rounded-sm border border-[#EEEEEE] px-2 py-1"
+            />
+          </div>
+        </div>
+        <div className="border-t border-[#EEEEEE] w-4/5"></div>
+
+        <div className="bg-white w-full p-4">
+          <h3 className="text-sm font-semibold text-[#333333]">اللون</h3>
+          <div className="mt-3 space-y-2 text-sm text-[#666666]">
+            {colors.map((color) => (
+              <label key={color.id} className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name={`color-${namePrefix}`}
+                  checked={colorId === color.id}
+                  onChange={() => handleColorChange(color.id)}
+                  className="peer sr-only"
+                />
+
+                {/* Radio circle */}
+                <span className="h-4 w-4 aspect-square shrink-0 rounded-full border-2 border-[#D9D9D9] peer-checked:border-[#B47720] peer-checked:bg-[#B47720] flex items-center justify-center transition-colors">
+                  {/* White inner circle when checked */}
+                  <span className="h-2 w-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                </span>
+                <span
+                  className="inline-block h-5 w-5 aspect-square rounded-full border border-[#DDDDDD]"
+                  style={
+                    color.hex_code
+                      ? { backgroundColor: color.hex_code }
+                      : undefined
+                  }
+                />
+                <div className="flex flex-row items-center justify-between w-full">
+                  <span>{color.name ?? "—"}</span>
+                  <span className="text-xs text-[#999999]">
+                    ({colorCounts.get(color.id) ?? 0})
+                  </span>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+        <div className="border-t border-[#EEEEEE] w-4/5"></div>
+
+        <div className="bg-white w-full p-4">
+          <h3 className="text-sm font-semibold text-[#333333]">التقييم</h3>
+          <div className="mt-3 space-y-2 text-sm text-[#666666]">
+            {[5, 4, 3, 2, 1].map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => handleRatingChange(value)}
+                className="flex items-center gap-2 accent-[#F5B301]"
+                aria-label={`${value} نجوم فأعلى`}
+              >
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className={
+                        star <= value
+                          ? "text-[#F5B301]"
+                          : "text-[#E5E5E5]"
+                      }
+                      aria-hidden="true"
+                    >
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                  ))}
+                </div>
+
+                <span
+                  className={
+                    rating === value ? "text-[#333333] font-semibold" : ""
+                  }
+                >
+                  {value} نجوم فأعلى
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleReset}
+        className="w-full rounded-sm border border-[#B47720] px-4 py-2 text-sm font-semibold text-[#B47720] hover:bg-[#B47720] hover:text-white"
+      >
+        إعادة ضبط
+      </button>
+    </div>
+  );
+
   return (
     <section className="bg-[#FFFFFF] py-8">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10">
@@ -181,179 +348,20 @@ export default function ShopPageShell({
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[260px_1fr]">
-          <aside className="space-y-2 w-65">
-            <div className="w-65 flex flex-col items-center border rounded-sm border-[#EEEEEE]">
-              <div className="bg-white w-full p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-[#333333]">
-                    الفئة
-                  </h3>
-                  <button
-                    type="button"
-                    className="text-xs text-[#B47720] accent-[#F5B301] outline-none"
-                    onClick={() => handleCategoryChange("all")}
-                  >
-                    الكل
-                  </button>
-                </div>
-                <div className="mt-3 space-y-2 text-sm text-[#666666]">
-                  {categories.map((category) => (
-                    <label
-                      key={category.id}
-                      className="flex items-center gap-3 cursor-pointer select-none"
-                    >
-                      <input
-                        type="radio"
-                        name="category"
-                        checked={categoryId === category.id}
-                        onChange={() =>
-                          handleCategoryChange(category.id ?? "all")
-                        }
-                        className="peer sr-only"
-                      />
-
-                      {/* Radio circle */}
-                      <span className="h-4 w-4 aspect-square shrink-0 rounded-full border-2 border-[#D9D9D9] peer-checked:border-[#B47720] peer-checked:bg-[#B47720] flex items-center justify-center transition-colors">
-                        {/* White inner circle when checked */}
-                        <span className="h-2 w-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                      </span>
-
-                      <div className="flex w-full items-center justify-between">
-                        <span className="text-sm text-[#666666]">
-                          {category.name ?? "—"}
-                        </span>
-
-                        <span className="text-xs text-[#999999]">
-                          ({categoryCounts.get(category.id ?? "") ?? 0})
-                        </span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-t border-[#EEEEEE] w-4/5"></div>
-
-              <div className="bg-white w-full p-4">
-                <h3 className="text-sm font-semibold text-[#333333]">السعر</h3>
-                <div className="mt-3 flex items-center gap-2 text-xs text-[#666666]">
-                  <input
-                    type="number"
-                    value={minPrice}
-                    onChange={(event) =>
-                      handleMinPriceChange(Number(event.target.value))
-                    }
-                    className="w-20 rounded-sm border border-[#EEEEEE] accent-[#F5B301] px-2 py-1"
-                  />
-                  <span>إلى</span>
-                  <input
-                    type="number"
-                    value={maxPrice}
-                    onChange={(event) =>
-                      handleMaxPriceChange(Number(event.target.value))
-                    }
-                    className="w-20 rounded-sm border border-[#EEEEEE] px-2 py-1"
-                  />
-                </div>
-              </div>
-              <div className="border-t border-[#EEEEEE] w-4/5"></div>
-
-              <div className="bg-white w-full p-4">
-                <h3 className="text-sm font-semibold text-[#333333]">اللون</h3>
-                <div className="mt-3 space-y-2 text-sm text-[#666666]">
-                  {colors.map((color) => (
-                    <label key={color.id} className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="color"
-                        checked={colorId === color.id}
-                        onChange={() => handleColorChange(color.id)}
-                        className="peer sr-only"
-                      />
-
-                      {/* Radio circle */}
-                      <span className="h-4 w-4 aspect-square shrink-0 rounded-full border-2 border-[#D9D9D9] peer-checked:border-[#B47720] peer-checked:bg-[#B47720] flex items-center justify-center transition-colors">
-                        {/* White inner circle when checked */}
-                        <span className="h-2 w-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                      </span>
-                      <span
-                        className="inline-block h-5 w-5 aspect-square rounded-full border border-[#DDDDDD]"
-                        style={
-                          color.hex_code
-                            ? { backgroundColor: color.hex_code }
-                            : undefined
-                        }
-                      />
-                      <div className="flex flex-row items-center justify-between w-full">
-                        <span>{color.name ?? "—"}</span>
-                        <span className="text-xs text-[#999999]">
-                          ({colorCounts.get(color.id) ?? 0})
-                        </span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div className="border-t border-[#EEEEEE] w-4/5"></div>
-
-              <div className="bg-white w-full p-4">
-                <h3 className="text-sm font-semibold text-[#333333]">
-                  التقييم
-                </h3>
-                <div className="mt-3 space-y-2 text-sm text-[#666666]">
-                  {[5, 4, 3, 2, 1].map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => handleRatingChange(value)}
-                      className="flex items-center gap-2 accent-[#F5B301]"
-                      aria-label={`${value} نجوم فأعلى`}
-                    >
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <svg
-                            key={star}
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className={
-                              star <= value
-                                ? "text-[#F5B301]"
-                                : "text-[#E5E5E5]"
-                            }
-                            aria-hidden="true"
-                          >
-                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                          </svg>
-                        ))}
-                      </div>
-
-                      <span
-                        className={
-                          rating === value ? "text-[#333333] font-semibold" : ""
-                        }
-                      >
-                        {value} نجوم فأعلى
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleReset}
-              className="w-full rounded-sm border border-[#B47720] px-4 py-2 text-sm font-semibold text-[#B47720] hover:bg-[#B47720] hover:text-white"
-            >
-              إعادة ضبط
-            </button>
+          <aside className="hidden lg:block w-65">
+            {renderFilterPanel("desktop")}
           </aside>
 
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-sm border border-[#EEEEEE] bg-white px-4 py-3 text-sm text-[#777777]">
               <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsFilterOpen(true)}
+                  className="lg:hidden h-9 px-3 rounded-sm border border-[#B47720] text-[#B47720] hover:bg-[#B47720] hover:text-white transition"
+                >
+                  فلترة
+                </button>
                 <button
                   type="button"
                   onClick={() => setView("grid")}
@@ -707,6 +715,30 @@ export default function ShopPageShell({
           </div>
         </div>
       </div>
+
+            {isFilterOpen ? (
+        <div
+          className="lg:hidden fixed inset-0 z-50 bg-black/40"
+          onClick={() => setIsFilterOpen(false)}
+        >
+          <div
+            className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto bg-white rounded-t-2xl p-4"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-semibold text-[#333333]">الفلترة</h3>
+              <button
+                type="button"
+                onClick={() => setIsFilterOpen(false)}
+                className="text-sm text-[#666666]"
+              >
+                إغلاق
+              </button>
+            </div>
+            {renderFilterPanel("mobile")}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

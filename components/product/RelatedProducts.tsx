@@ -49,13 +49,25 @@ export default function RelatedProducts({ products, category }: Props) {
           عرض الكل
         </Link>
       </div>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 hidden md:grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {products.map((item) => (
           <ProductCard
             key={item.variant_id ?? item.product_id}
             product={item}
           />
         ))}
+      </div>
+      <div className="mt-6 md:hidden -mx-4 px-4">
+        <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory">
+          {products.map((item) => (
+            <div
+              key={item.variant_id ?? item.product_id}
+              className="snap-start w-[70vw] max-w-90   min-w-60   shrink-0"
+            >
+              <ProductCard product={item} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
