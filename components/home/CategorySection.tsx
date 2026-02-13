@@ -61,7 +61,7 @@ export default function CategorySection() {
               <Image
                 src={
                   category.image_url ||
-                  `https://via.placeholder.com/400x400/B47720/FFFFFF?text=${category.name}`
+                  `https://supabase.elazaz.site/storage/v1/object/public/categories//placeholder.png`
                 }
                 alt={category.name}
                 width={1000}

@@ -577,6 +577,13 @@ export default function ProfilePage() {
                   </button>
                 );
               })}
+              <Link
+                href={"/reset-password"}
+                className="flex w-full items-center justify-between rounded-sm px-3 py-2 hover:bg-[#F8F8F8] disabled:opacity-60"
+              >
+                تغيير كلمة المرور
+              </Link>
+
               <button
                 type="button"
                 onClick={handleSignOut}

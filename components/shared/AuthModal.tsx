@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Eye, EyeOff, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 type AuthMode = "login" | "signup";
@@ -232,7 +233,13 @@ export default function AuthModal({
                 </div>
               </label>
             ) : (
-              <div className="text-sm text-[#B47720]">نسيت كلمة المرور</div>
+              <Link
+                href="/forgot-password"
+                onClick={handleClose}
+                className="block text-sm text-[#B47720] hover:underline"
+              >
+                نسيت كلمة المرور؟
+              </Link>
             )}
 
             <button
