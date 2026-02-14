@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { KeyboardEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { openAuthModal } from "@/lib/auth-modal";
 
 type Product = {
   product_id?: string;
@@ -79,6 +80,10 @@ export default function ProductCard({ product }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ variant_id: product.variant_id }),
       });
+      if (response.status === 401) {
+        openAuthModal("login");
+        return;
+      }
       if (!response.ok) return;
       const payload = (await response.json()) as { wishlisted?: boolean };
       setIsWishlisted(Boolean(payload.wishlisted));
@@ -97,7 +102,7 @@ export default function ProductCard({ product }: Props) {
         body: JSON.stringify({ variant_id: product.variant_id, qty: 1 }),
       });
       if (response.status === 401) {
-        window.location.href = "/login";
+        openAuthModal("login");
         return;
       }
     } finally {

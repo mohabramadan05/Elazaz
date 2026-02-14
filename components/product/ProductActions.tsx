@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { openAuthModal } from "@/lib/auth-modal";
 
 type Props = {
   variantId?: string;
@@ -26,7 +27,7 @@ export default function ProductActions({ variantId }: Props) {
         body: JSON.stringify({ variant_id: variantId, qty }),
       });
       if (response.status === 401) {
-        window.location.href = "/login";
+        openAuthModal("login");
       }
     } finally {
       setIsAdding(false);

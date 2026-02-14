@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import ProductActions from "@/components/product/ProductActions";
 import { useRouter } from "next/navigation";
+import { openAuthModal } from "@/lib/auth-modal";
 
 type Variant = {
   variant_id?: string;
@@ -128,6 +129,10 @@ export default function ProductInfo({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ variant_id: selectedVariant.variant_id }),
       });
+      if (response.status === 401) {
+        openAuthModal("login");
+        return;
+      }
       if (!response.ok) return;
       const payload = (await response.json()) as { wishlisted?: boolean };
       setWishlisted(Boolean(payload.wishlisted));

@@ -661,7 +661,11 @@ export default function ProfilePage() {
 
                                 <button
                                   type="button"
-                                  onClick={() => handleRemoveWishlistItem(item)}
+                                  onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    handleRemoveWishlistItem(item);
+                                  }}
                                   disabled={wishlistUpdatingId === item.id}
                                   className="h-8 w-8 rounded-full flex justify-center items-center bg-[#F8F8F8] text-[#444444] hover:bg-[#B47720] hover:text-[#FFFFFF] disabled:opacity-60"
                                   aria-label="حذف"

@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo, useState, type MouseEvent } from "react";
 import Image from "next/image";
 import NewsLetter from "./news";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -6,8 +9,53 @@ import {
   faInstagram,
 } from "@fortawesome/free-brands-svg-icons";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { openAuthModal } from "@/lib/auth-modal";
 
 export default function Header() {
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
+  const [footerBadgeSrc, setFooterBadgeSrc] = useState({
+    vat: "/assets/vat.jpg",
+    visa: "/assets/visa.png",
+    mastercard: "/assets/mastercard.png",
+    paypal: "/assets/paypal.png",
+  });
+
+  const handleFooterBadgeError = (
+    key: "vat" | "visa" | "mastercard" | "paypal",
+  ) => {
+    setFooterBadgeSrc((prev) =>
+      prev[key] === "/assets/logo.png"
+        ? prev
+        : { ...prev, [key]: "/assets/logo.png" },
+    );
+  };
+
+  const handleProtectedNavigation =
+    (href: string) => async (event: MouseEvent<HTMLAnchorElement>) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data.user) {
+        openAuthModal("login");
+        return;
+      }
+
+      router.push(href);
+    };
+
   return (
     <footer className="mt-12">
       <NewsLetter />
@@ -28,16 +76,28 @@ export default function Header() {
           <div>
             <h3 className="font-semibold text-lg mb-4">حسابي</h3>
             <ul className="flex flex-col gap-3 text-sm text-[#666]">
-              <Link href="/profile">
+              <Link
+                href="/profile"
+                onClick={handleProtectedNavigation("/profile")}
+              >
                 <li className="hover:text-[#C58A3A]">» حسابي</li>
               </Link>
-              <Link href="/profile?panel=orders">
+              <Link
+                href="/profile?panel=orders"
+                onClick={handleProtectedNavigation("/profile?panel=orders")}
+              >
                 <li className="hover:text-[#C58A3A]">» طلباتي</li>
               </Link>
-              <Link href="/profile/cart">
+              <Link
+                href="/profile/cart"
+                onClick={handleProtectedNavigation("/profile/cart")}
+              >
                 <li className="hover:text-[#C58A3A]">» سلة المشتريات</li>
               </Link>
-              <Link href="/profile?panel=wishlist">
+              <Link
+                href="/profile?panel=wishlist"
+                onClick={handleProtectedNavigation("/profile?panel=wishlist")}
+              >
                 <li className="hover:text-[#C58A3A]">» المفضلة</li>
               </Link>
             </ul>
@@ -114,33 +174,37 @@ export default function Header() {
         </span>
         <div className="flex flex-row flex-wrap justify-center lg:justify-end gap-2 items-center">
           <Image
-            src="/assets/vat.jpg"
+            src={footerBadgeSrc.vat}
             width={22.5}
             height={30}
             alt="vat"
             className="h-6 w-auto"
+            onError={() => handleFooterBadgeError("vat")}
           />
           <p className="pe-0 lg:pe-5">757-426-174 : الرقم الضريبي</p>
           <Image
-            src="/assets/visa.png"
+            src={footerBadgeSrc.visa}
             width={64}
             height={31}
             alt="visa"
             className="h-6 w-auto"
+            onError={() => handleFooterBadgeError("visa")}
           />
           <Image
-            src="/assets/mastercard.png"
+            src={footerBadgeSrc.mastercard}
             width={60}
             height={31}
             alt="mastercard"
             className="h-6 w-auto"
+            onError={() => handleFooterBadgeError("mastercard")}
           />
           <Image
-            src="/assets/paypal.png"
+            src={footerBadgeSrc.paypal}
             width={60}
             height={31}
             alt="paypal"
             className="h-6 w-auto"
+            onError={() => handleFooterBadgeError("paypal")}
           />
         </div>
       </div>

@@ -18,6 +18,11 @@ import Image from "next/image";
 import Link from "next/link";
 import AuthModal from "./AuthModal";
 import { createClient } from "@/lib/supabase/client";
+import {
+  AUTH_MODAL_OPEN_EVENT,
+  type AuthModalMode,
+  type OpenAuthModalDetail,
+} from "@/lib/auth-modal";
 
 export default function Header() {
   const supabase = useMemo(() => createClient(), []);
@@ -25,7 +30,7 @@ export default function Header() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [authMode, setAuthMode] = useState<AuthModalMode>("login");
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [userImageUrl, setUserImageUrl] = useState<string | null>(null);
@@ -96,6 +101,20 @@ export default function Header() {
       subscription.subscription.unsubscribe();
     };
   }, [supabase]);
+
+  useEffect(() => {
+    const handleOpenAuthModal = (event: Event) => {
+      const detail = (event as CustomEvent<OpenAuthModalDetail>).detail;
+      setAuthMode(detail?.mode === "signup" ? "signup" : "login");
+      setIsAuthOpen(true);
+      setIsUserMenuOpen(false);
+    };
+
+    window.addEventListener(AUTH_MODAL_OPEN_EVENT, handleOpenAuthModal);
+    return () => {
+      window.removeEventListener(AUTH_MODAL_OPEN_EVENT, handleOpenAuthModal);
+    };
+  }, []);
 
   const handleUserClick = () => {
     if (!userEmail) {
