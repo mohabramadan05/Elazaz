@@ -10,10 +10,10 @@ type CookieOptions = {
 };
 
 const getSupabaseUrl = () =>
-  process.env.SUPABASE_URL;
+  process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 const getSupabaseAnonKey = () =>
-   process.env.SUPABASE_ANON_KEY;
+   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const getSupabaseServiceRoleKey = () =>
    process.env.SERVICE_ROLE_KEY;
