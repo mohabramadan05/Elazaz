@@ -84,13 +84,16 @@ const getByPath = (obj: JsonRecord, path: string): unknown => {
 };
 
 const verifyHexHmac = (raw: string, secret: string, received: string) => {
-  const expected = createHmac("sha512", secret).update(raw, "utf8").digest("hex");
+  const expected = createHmac("sha512", secret)
+    .update(raw, "utf8")
+    .digest("hex");
   const expectedHex = expected.toLowerCase();
   const receivedHex = received.toLowerCase();
 
   const isHex = (value: string) => /^[a-f0-9]+$/i.test(value);
   if (!isHex(expectedHex) || !isHex(receivedHex)) return false;
-  if (expectedHex.length !== receivedHex.length || expectedHex.length % 2 !== 0) return false;
+  if (expectedHex.length !== receivedHex.length || expectedHex.length % 2 !== 0)
+    return false;
 
   const expectedBuffer = Buffer.from(expectedHex, "hex");
   const receivedBuffer = Buffer.from(receivedHex, "hex");
@@ -143,7 +146,10 @@ async function parseIncomingPayload(request: Request): Promise<JsonRecord> {
   }
 
   // Handle form-urlencoded: key=value&...
-  if (contentType.includes("application/x-www-form-urlencoded") || raw.includes("=")) {
+  if (
+    contentType.includes("application/x-www-form-urlencoded") ||
+    raw.includes("=")
+  ) {
     const params = new URLSearchParams(raw);
     const out: JsonRecord = {};
     for (const [k, v] of params.entries()) {
@@ -169,6 +175,9 @@ export async function POST(request: Request) {
     const receivedHmac =
       asNonEmptyString(payload.hmac) ?? asNonEmptyString(wrappedObj.hmac);
 
+    console.log("Received HMAC:", receivedHmac);
+    console.log("Length:", receivedHmac?.length);
+
     if (!receivedHmac) {
       return NextResponse.json({ error: "Missing HMAC" }, { status: 400 });
     }
@@ -176,12 +185,15 @@ export async function POST(request: Request) {
     const hmacSecret = process.env.PAYMOB_HMAC_SECRET ?? process.env.HMAC;
     if (!hmacSecret) {
       console.error("PAYMOB_HMAC_SECRET is not configured");
-      return NextResponse.json({ error: "Webhook configuration error" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Webhook configuration error" },
+        { status: 500 },
+      );
     }
 
-    const dataToSign = PAYMOB_PROCESSED_HMAC_FIELDS
-      .map((field) => toSignValue(getByPath(transactionObj, field)))
-      .join("");
+    const dataToSign = PAYMOB_PROCESSED_HMAC_FIELDS.map((field) =>
+      toSignValue(getByPath(transactionObj, field)),
+    ).join("");
 
     const isValidHmac = verifyHexHmac(dataToSign, hmacSecret, receivedHmac);
     if (!isValidHmac) {
@@ -201,7 +213,10 @@ export async function POST(request: Request) {
     const supabase = createAdminClient();
     if (!supabase) {
       console.error("Missing Supabase admin env vars");
-      return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Server configuration error" },
+        { status: 500 },
+      );
     }
 
     let order: OrderLookupRow | null = null;
@@ -216,7 +231,10 @@ export async function POST(request: Request) {
 
       if (error) {
         console.error("Failed to lookup order by paymob_order_id", error);
-        return NextResponse.json({ error: "Database lookup failed" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Database lookup failed" },
+          { status: 500 },
+        );
       }
       order = (data as OrderLookupRow | null) ?? null;
     }
@@ -231,7 +249,10 @@ export async function POST(request: Request) {
 
       if (error) {
         console.error("Failed to lookup order by merchant_order_id", error);
-        return NextResponse.json({ error: "Database lookup failed" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Database lookup failed" },
+          { status: 500 },
+        );
       }
       order = (data as OrderLookupRow | null) ?? null;
     }
@@ -246,7 +267,10 @@ export async function POST(request: Request) {
 
       if (error) {
         console.error("Failed to lookup order by transaction_id", error);
-        return NextResponse.json({ error: "Database lookup failed" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Database lookup failed" },
+          { status: 500 },
+        );
       }
       order = (data as OrderLookupRow | null) ?? null;
     }
@@ -260,7 +284,7 @@ export async function POST(request: Request) {
       // Return 200 to avoid Paymob retry storms
       return NextResponse.json(
         { ok: true, note: "Order not found for callback references" },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -285,13 +309,22 @@ export async function POST(request: Request) {
       .eq("id", order.id);
 
     if (updateError) {
-      console.error("Failed to update order from processed callback", updateError);
-      return NextResponse.json({ error: "Database update failed" }, { status: 500 });
+      console.error(
+        "Failed to update order from processed callback",
+        updateError,
+      );
+      return NextResponse.json(
+        { error: "Database update failed" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (error) {
     console.error("Unhandled processed callback error", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
