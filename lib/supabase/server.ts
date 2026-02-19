@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 type CookieOptions = {
@@ -17,7 +18,7 @@ const getSupabaseAnonKey = () =>
 const getSupabaseServiceRoleKey = () =>
   process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_KEY;
 
-let adminClientInstance: ReturnType<typeof createSupabaseClient> | null = null;
+let adminClientInstance: SupabaseClient | null = null;
 
 export async function createClient() {
   const cookieStore = await cookies();
@@ -44,7 +45,7 @@ export async function createClient() {
   });
 }
 
-export function createAdminClient() {
+export function createAdminClient(): SupabaseClient | null {
   if (adminClientInstance) return adminClientInstance;
 
   const url = getSupabaseUrl();
