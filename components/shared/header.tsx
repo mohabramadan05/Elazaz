@@ -1,5 +1,5 @@
 ﻿"use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   Menu,
   X,
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import AuthModal from "./AuthModal";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -26,6 +27,7 @@ import {
 
 export default function Header() {
   const supabase = useMemo(() => createClient(), []);
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -35,6 +37,7 @@ export default function Header() {
   const [userName, setUserName] = useState<string | null>(null);
   const [userImageUrl, setUserImageUrl] = useState<string | null>(null);
   const [cartCount, setCartCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -130,6 +133,20 @@ export default function Header() {
     setIsUserMenuOpen(false);
   };
 
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    const params = new URLSearchParams();
+
+    if (query) {
+      params.set("q", query);
+    }
+
+    const target = params.toString() ? `/shop?${params.toString()}` : "/shop";
+    router.push(target);
+    setIsMobileSearchOpen(false);
+  };
+
   return (
     <>
       <header className="sticky top-0 right-0 left-0 z-50">
@@ -218,20 +235,29 @@ export default function Header() {
               alt="ELAZAZ Logo"
               height={100}
               width={75}
+              className="h-[58px] w-auto"
             />
           </Link>
 
           {/* Search - Hidden on mobile */}
           <div className="hidden lg:block">
-            <div className="relative">
+            <form className="relative" onSubmit={handleSearchSubmit}>
               <input
                 type="text"
                 placeholder="ابحث عن منتج"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
                 className="w-96 h-12 border border-[#CCCCCC] rounded-md px-4 pr-10 focus:outline-none focus:border-[#B47720]"
               />
-              <Search className="absolute right-3 top-3 w-5 h-5 text-gray-400" />
-            </div>
-          </div>
+              <button
+                type="submit"
+                aria-label="Search products"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                <Search className="w-5 h-5 text-gray-400" />
+              </button>
+            </form>
+           </div>
 
           {/* Right Side Icons */}
           <div className="flex gap-3 lg:gap-4">
@@ -310,14 +336,22 @@ export default function Header() {
         {/* Mobile Search Bar */}
         {isMobileSearchOpen ? (
           <div className="lg:hidden bg-white px-4 py-3 border-b">
-            <div className="relative">
+            <form className="relative" onSubmit={handleSearchSubmit}>
               <input
                 type="text"
                 placeholder="ابحث عن منتج"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
                 className="w-full h-10 border border-[#CCCCCC] rounded-md px-4 pr-10 focus:outline-none focus:border-[#B47720]"
               />
-              <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
-            </div>
+              <button
+                type="submit"
+                aria-label="Search products"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                <Search className="w-5 h-5 text-gray-400" />
+              </button>
+            </form>
           </div>
         ) : null}
       </header>

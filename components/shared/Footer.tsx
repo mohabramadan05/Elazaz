@@ -186,7 +186,7 @@ export default function Header() {
             src={footerBadgeSrc.visa}
             width={64}
             height={31}
-            alt="visa"
+            alt="visa"  
             className="h-6 w-auto"
             onError={() => handleFooterBadgeError("visa")}
           />

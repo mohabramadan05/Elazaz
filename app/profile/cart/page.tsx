@@ -59,6 +59,17 @@ export default function CartPage() {
     }, 0);
   }, [items]);
 
+  const totalItemsCount = useMemo(() => {
+    return items.reduce((count, item) => count + (item.quantity ?? 1), 0);
+  }, [items]);
+
+  const deliveryFee = useMemo(() => {
+    if (totalItemsCount <= 0) return 0;
+    return 1000 + totalItemsCount * 130;
+  }, [totalItemsCount]);
+
+  const total = subtotal + deliveryFee;
+
   const handleQuantityChange = async (
     itemId: string,
     action: "increment" | "decrement",
@@ -146,7 +157,9 @@ export default function CartPage() {
                         />
                         <div className="text-right">
                           <p className="text-sm font-semibold text-[#333333]">
-                            {item.product_name ?? "منتج"} {item.color_name ? item.color_name : ""} , {item.size_name ? item.size_name : ""}
+                            {item.product_name ?? "منتج"}{" "}
+                            {item.color_name ? item.color_name : ""} ,{" "}
+                            {item.size_name ? item.size_name : ""}
                           </p>
                           {/* {(item.color_name || item.size_name) && (
                             <p className="text-xs text-[#888888]">
@@ -190,7 +203,7 @@ export default function CartPage() {
                             className="px-2 text-lg text-[#999999] disabled:opacity-60"
                             aria-label="تقليل الكمية"
                           >
-                            −
+                            -
                           </button>
                         </div>
                         <div className="text-sm md:text-base font-semibold text-[#333333]">
@@ -231,40 +244,26 @@ export default function CartPage() {
                 <span>مجموع المنتجات</span>
                 <span>{formatPrice(subtotal)} ج.م</span>
               </div>
-
-              <div className="space-y-2">
-                <p className="text-sm text-[#666666]">هل لديك كود خصم</p>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    placeholder="أدخل كود الخصم"
-                    className="w-full rounded-sm border border-[#EEEEEE] px-3 py-2 text-sm text-[#666666] focus:border-[#B47720] focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    className="rounded-sm border border-[#B47720] px-4 py-2 text-sm font-semibold text-[#B47720] hover:bg-[#B47720] hover:text-white"
-                  >
-                    إضافة
-                  </button>
-                </div>
+              <div className="flex items-center justify-between">
+                <span>التوصيل</span>
+                <span>{formatPrice(deliveryFee)} ج.م</span>
               </div>
-
               <div className="border-t border-[#EEEEEE]" />
 
               <div className="flex items-center justify-between text-base font-semibold text-[#333333]">
                 <span>الإجمالي</span>
-                <span>{formatPrice(subtotal)} ج.م</span>
+                <span>{formatPrice(total)} ج.م</span>
               </div>
 
               <p className="text-xs text-[#999999]">* الأسعار شاملة للضريبة</p>
             </div>
 
-            <button
-              type="button"
-              className="mt-6 w-full rounded-sm bg-[#B47720] px-4 py-3 text-sm font-semibold text-white hover:bg-[#9F6418]"
+            <Link
+              href="/profile/checkout"
+              className="mt-6 block w-full rounded-sm bg-[#B47720] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#9F6418]"
             >
               إتمام الطلب
-            </button>
+            </Link>
           </aside>
         </div>
       </div>

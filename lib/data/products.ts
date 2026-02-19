@@ -63,6 +63,7 @@ export type ShopProduct = {
 
 type FetchProductsArgs = {
   categoryId?: string;
+  searchQuery?: string;
 };
 
 const pickImages = (variant?: Variant) => {
@@ -80,7 +81,10 @@ const pickImages = (variant?: Variant) => {
   };
 };
 
-export async function fetchProducts({ categoryId }: FetchProductsArgs = {}) {
+export async function fetchProducts({
+  categoryId,
+  searchQuery,
+}: FetchProductsArgs = {}) {
   const supabase = await createClient();
 
   let query = supabase
@@ -93,6 +97,10 @@ export async function fetchProducts({ categoryId }: FetchProductsArgs = {}) {
 
   if (categoryId) {
     query = query.eq("category_id", categoryId);
+  }
+
+  if (searchQuery?.trim()) {
+    query = query.ilike("name", `%${searchQuery.trim()}%`);
   }
 
   const { data, error } = await query;
