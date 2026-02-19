@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -30,6 +30,7 @@ const PAYMOB_PROCESSED_HMAC_FIELDS = [
 ] as const;
 
 type JsonRecord = Record<string, unknown>;
+type OrderLookupRow = { id: string };
 
 const asObject = (value: unknown): JsonRecord =>
   value && typeof value === "object" ? (value as JsonRecord) : {};
@@ -93,22 +94,25 @@ const extractPaymobOrderId = (transactionObj: JsonRecord): string | null => {
   return (
     normalizeId(nestedOrder.id) ??
     normalizeId(transactionObj.order_id) ??
+    normalizeId(transactionObj.order) ??
     null
   );
 };
 
-const createAdminClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const extractMerchantOrderId = (transactionObj: JsonRecord): string | null => {
+  const nestedOrder = asObject(transactionObj.order);
+  const rootExtras = asObject(transactionObj.extras);
+  const orderExtras = asObject(nestedOrder.extras);
 
-  if (!supabaseUrl || !serviceRoleKey) return null;
-
-  return createSupabaseClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
+  return (
+    normalizeId(transactionObj.merchant_order_id) ??
+    normalizeId(nestedOrder.merchant_order_id) ??
+    normalizeId(rootExtras.order_id) ??
+    normalizeId(rootExtras.merchant_order_id) ??
+    normalizeId(orderExtras.order_id) ??
+    normalizeId(orderExtras.merchant_order_id) ??
+    null
+  );
 };
 
 export async function POST(request: Request) {
@@ -146,13 +150,8 @@ export async function POST(request: Request) {
     }
 
     const paymobOrderId = extractPaymobOrderId(transactionObj);
-    if (!paymobOrderId) {
-      console.error("Processed callback missing Paymob order id", payload);
-      return NextResponse.json(
-        { ok: true, note: "No paymob_order_id in payload" },
-        { status: 200 },
-      );
-    }
+    const merchantOrderId = extractMerchantOrderId(transactionObj);
+    const transactionId = normalizeId(transactionObj.id);
 
     const supabase = createAdminClient();
     if (!supabase) {
@@ -163,33 +162,75 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: order, error: orderLookupError } = await supabase
-      .from("orders")
-      .select("id")
-      .eq("paymob_order_id", paymobOrderId)
-      .maybeSingle();
+    let order: OrderLookupRow | null = null;
 
-    if (orderLookupError) {
-      console.error("Failed to lookup order by paymob_order_id", orderLookupError);
-      return NextResponse.json({ error: "Database lookup failed" }, { status: 500 });
+    if (paymobOrderId) {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("paymob_order_id", paymobOrderId)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Failed to lookup order by paymob_order_id", error);
+        return NextResponse.json({ error: "Database lookup failed" }, { status: 500 });
+      }
+
+      order = (data as OrderLookupRow | null) ?? null;
+    }
+
+    if (!order && merchantOrderId) {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("id", merchantOrderId)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Failed to lookup order by merchant_order_id", error);
+        return NextResponse.json({ error: "Database lookup failed" }, { status: 500 });
+      }
+
+      order = (data as OrderLookupRow | null) ?? null;
+    }
+
+    if (!order && transactionId) {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("transaction_id", transactionId)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Failed to lookup order by transaction_id", error);
+        return NextResponse.json({ error: "Database lookup failed" }, { status: 500 });
+      }
+
+      order = (data as OrderLookupRow | null) ?? null;
     }
 
     if (!order?.id) {
+      console.error("Processed callback order mapping miss", {
+        paymobOrderId,
+        merchantOrderId,
+        transactionId,
+      });
       return NextResponse.json(
-        { ok: true, note: "Order not found for paymob_order_id" },
+        { ok: true, note: "Order not found for callback references" },
         { status: 200 },
       );
     }
 
-    const transactionId = normalizeId(transactionObj.id);
     const isSuccess = normalizeBoolean(transactionObj.success);
     const nextStatus = isSuccess ? "paid" : "failed";
 
     const updates: JsonRecord = {
       status: nextStatus,
       transaction: transactionObj,
-      paymob_order_id: paymobOrderId,
     };
+    if (paymobOrderId) {
+      updates.paymob_order_id = paymobOrderId;
+    }
     if (transactionId) {
       updates.transaction_id = transactionId;
     }

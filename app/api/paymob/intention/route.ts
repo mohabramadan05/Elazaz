@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 
 type BillingData = {
   apartment?: string;
@@ -71,7 +70,7 @@ const asObject = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 
 const asNonEmptyString = (value: unknown): string | null =>
-  typeof value === "string" && value.trim() ? value : null;
+  typeof value === "string" && value.trim() ? value.trim() : null;
 
 const normalizeId = (value: unknown): string | null => {
   if (typeof value === "string" && value.trim()) return value.trim();
@@ -83,20 +82,6 @@ const sleep = (ms: number) =>
   new Promise<void>((resolve) => {
     setTimeout(resolve, ms);
   });
-
-const createAdminClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !serviceRoleKey) return null;
-
-  return createSupabaseClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-};
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -354,12 +339,22 @@ export async function POST(request: Request) {
     typeof transactionIdRaw === "string" || typeof transactionIdRaw === "number"
       ? String(transactionIdRaw)
       : null;
+  const paymobOrderIdCandidates = [
+    normalizeId(rootOrder.id),
+    normalizeId(rootOrder.order_id),
+    normalizeId(paymobObj.order),
+    normalizeId(paymobObj.order_id),
+    normalizeId(paymobObj.intention_order_id),
+    normalizeId(paymobObj.intention_id),
+    normalizeId(detailOrder.id),
+    normalizeId(detailOrder.order_id),
+    normalizeId(intentionDetail.order_id),
+    normalizeId(intentionDetail.id),
+  ];
   const paymobOrderId =
-    normalizeId(rootOrder.id) ??
-    normalizeId(paymobObj.order) ??
-    normalizeId(paymobObj.order_id) ??
-    normalizeId(detailOrder.id) ??
-    normalizeId(intentionDetail.order_id);
+    paymobOrderIdCandidates.find(
+      (value): value is string => typeof value === "string" && value.length > 0,
+    ) ?? null;
   const clientSecret =
     asNonEmptyString(paymobObj.client_secret) ??
     asNonEmptyString(intentionDetail.client_secret);
@@ -371,12 +366,17 @@ export async function POST(request: Request) {
         )}&clientSecret=${encodeURIComponent(clientSecret)}`
       : null;
 
+  const orderUpdatePayload: Record<string, unknown> = {
+    transaction_id: transactionId,
+    transaction: paymobPayload,
+  };
+  if (paymobOrderId) {
+    orderUpdatePayload.paymob_order_id = paymobOrderId;
+  }
+
   const { error: updateError } = await db
     .from("orders")
-    .update({
-      transaction_id: transactionId,
-      transaction: paymobPayload,
-    })
+    .update(orderUpdatePayload)
     .eq("id", order.id)
     .eq("user_id", user.id);
 
@@ -384,17 +384,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
-  if (paymobOrderId) {
-    const { error: orderIdUpdateError } = await db
-      .from("orders")
-      .update({ paymob_order_id: paymobOrderId })
-      .eq("id", order.id)
-      .eq("user_id", user.id);
-
-    if (orderIdUpdateError) {
-      // Keep checkout flow successful even if DB schema is not yet migrated.
-      console.error("Failed to persist paymob_order_id", orderIdUpdateError);
-    }
+  if (!paymobOrderId) {
+    console.error("Paymob intention response missing paymob_order_id", {
+      orderId: order.id,
+      responseKeys: Object.keys(paymobObj),
+      intentionDetailKeys: Object.keys(intentionDetail),
+      rootOrderKeys: Object.keys(rootOrder),
+      detailOrderKeys: Object.keys(detailOrder),
+    });
   }
 
   return NextResponse.json({
