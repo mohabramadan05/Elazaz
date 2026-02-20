@@ -164,6 +164,24 @@ async function parseIncomingPayload(request: Request): Promise<JsonRecord> {
 
 export async function POST(request: Request) {
   try {
+    console.log("===== PAYMOB CALLBACK DEBUG =====");
+
+    console.log("METHOD:", request.method);
+    console.log("URL:", request.url);
+    console.log("HEADERS:", Object.fromEntries(request.headers.entries()));
+
+    const rawBody = await request.text();
+    console.log("RAW BODY:", rawBody);
+
+    try {
+      const parsed = JSON.parse(rawBody);
+      console.log("PARSED JSON:", parsed);
+    } catch {
+      console.log("Body is not valid JSON");
+    }
+
+    console.log("===== END DEBUG =====");
+
     const payload = await parseIncomingPayload(request);
 
     // Paymob sometimes wraps under `obj`
