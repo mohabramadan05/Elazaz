@@ -113,7 +113,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const paymobToken = process.env.SK_TEST;
+  const paymobToken = process.env.SK_LIVE;
   if (!paymobToken) {
     return NextResponse.json(
       { error: "PAYMOB_SECRET_TOKEN is not configured" },
@@ -151,6 +151,29 @@ export async function POST(request: Request) {
       { status: 404 },
     );
   }
+
+  const rollbackOrder = async () => {
+    const { error: deleteItemsError } = await db
+      .from("order_items")
+      .delete()
+      .eq("order_id", order.id);
+
+    if (deleteItemsError) {
+      return deleteItemsError.message;
+    }
+
+    const { error: deleteOrderError } = await db
+      .from("orders")
+      .delete()
+      .eq("id", order.id)
+      .eq("user_id", user.id);
+
+    if (deleteOrderError) {
+      return deleteOrderError.message;
+    }
+
+    return null;
+  };
 
   const { data: orderItemsData, error: orderItemsError } = await db
     .from("order_items")
@@ -285,7 +308,7 @@ export async function POST(request: Request) {
   const requestBody = {
     amount: paymobAmountMinor,
     currency: payload.currency ?? "EGP",
-    payment_methods:[4357822],
+    payment_methods:[4604594, 4604595],
     items,
     billing_data: billingData,
     extras: {
@@ -324,8 +347,21 @@ export async function POST(request: Request) {
   }
 
   if (!paymobResponse.ok) {
+    const rollbackError = await rollbackOrder();
+    if (rollbackError) {
+      console.error("Failed to roll back order after Paymob intention error", {
+        orderId: order.id,
+        rollbackError,
+      });
+    }
+
     return NextResponse.json(
-      { error: "Failed to create Paymob intention", details: paymobPayload },
+      {
+        error: "Failed to create Paymob intention",
+        details: paymobPayload,
+        order_rolled_back: !rollbackError,
+        rollback_error: rollbackError,
+      },
       { status: paymobResponse.status },
     );
   }
@@ -358,7 +394,7 @@ export async function POST(request: Request) {
   const clientSecret =
     asNonEmptyString(paymobObj.client_secret) ??
     asNonEmptyString(intentionDetail.client_secret);
-  const publicKey = asNonEmptyString(process.env.PK_TEST);
+  const publicKey = asNonEmptyString(process.env.PK_LIVE);
   const unifiedCheckoutUrl =
     clientSecret && publicKey
       ? `https://accept.paymob.com/unifiedcheckout/?publicKey=${encodeURIComponent(

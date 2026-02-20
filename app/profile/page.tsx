@@ -51,6 +51,60 @@ type NotificationItem = {
   created_at: string | null;
 };
 
+type OrderRow = {
+  id: string;
+  status: string | null;
+  total_amount: number | string | null;
+  discount_amount: number | string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  shipping_address: unknown;
+  address_id: string | null;
+};
+
+type OrderItemRow = {
+  order_id: string;
+  variant_id: string | null;
+  quantity: number | null;
+  price: number | string | null;
+};
+
+type VariantImage = {
+  image_url?: string | null;
+  is_main?: boolean | null;
+  created_at?: string | null;
+};
+
+type VariantProduct = {
+  name?: string | null;
+};
+
+type VariantRow = {
+  id: string;
+  products?: VariantProduct | VariantProduct[] | null;
+  variant_images?: VariantImage[] | null;
+};
+
+type OrderLineItem = {
+  variantId: string | null;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+  imageUrl: string | null;
+};
+
+type OrderCard = {
+  id: string;
+  status: string;
+  createdAt: string | null;
+  shippingLine: string;
+  totalAmount: number;
+  discountAmount: number;
+  payableAmount: number;
+  items: OrderLineItem[];
+};
+
 const COUNTRY_OPTIONS = [
   { code: "+20", label: "مصر" },
   { code: "+966", label: "السعودية" },
@@ -108,6 +162,62 @@ const getUnitPrice = (item: WishlistItem) => {
   return base;
 };
 
+const parseNumber = (value: number | string | null | undefined) => {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const asObject = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+
+const asNonEmptyString = (value: unknown): string | null =>
+  typeof value === "string" && value.trim() ? value.trim() : null;
+
+const joinAddressParts = (parts: Array<string | null | undefined>) => {
+  const normalized = parts
+    .map((value) => asNonEmptyString(value))
+    .filter((value): value is string => Boolean(value));
+  return normalized.join(" - ");
+};
+
+const formatOrderDate = (value: string | null) => {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  const day = new Intl.DateTimeFormat("ar-EG", { weekday: "long" }).format(
+    date,
+  );
+  const dateText = new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  }).format(date);
+  return `${day} ${dateText}`;
+};
+
+const getOrderStatusMeta = (status: string) => {
+  const normalized = status.trim().toLowerCase();
+  if (normalized === "paid") {
+    return { label: "تم الدفع", className: "bg-[#ECFDF3] text-[#15803D]" };
+  }
+  if (normalized === "failed") {
+    return { label: "فشل الدفع", className: "bg-[#FFF1F2] text-[#BE123C]" };
+  }
+  if (normalized === "unpaid") {
+    return { label: "بانتظار الدفع", className: "bg-[#FEF9C3] text-[#854D0E]" };
+  }
+  if (normalized === "cancelled") {
+    return { label: "ملغي", className: "bg-[#F3F4F6] text-[#4B5563]" };
+  }
+  if (normalized === "shipped") {
+    return { label: "تم الشحن", className: "bg-[#EFF6FF] text-[#1D4ED8]" };
+  }
+  if (normalized === "delivered") {
+    return { label: "تم التوصيل", className: "bg-[#ECFEFF] text-[#0F766E]" };
+  }
+  return { label: "قيد المعالجة", className: "bg-[#F3F4F6] text-[#4B5563]" };
+};
+
 const formatPrice = (value: number) => {
   return value.toLocaleString("en-US");
 };
@@ -126,6 +236,9 @@ export default function ProfilePage() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [notificationsLoaded, setNotificationsLoaded] = useState(false);
+  const [orders, setOrders] = useState<OrderCard[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [profileName, setProfileName] = useState("");
@@ -233,6 +346,193 @@ export default function ProfilePage() {
       isMounted = false;
     };
   }, [supabase, userId]);
+
+  useEffect(() => {
+    if (!userId || activePanel !== "orders") return;
+
+    let isMounted = true;
+    const loadOrders = async () => {
+      setOrdersLoading(true);
+      setOrdersError(null);
+      try {
+        const { data: ordersData, error: ordersLoadError } = await supabase
+          .from("orders")
+          .select(
+            "id,status,total_amount,discount_amount,created_at,updated_at,shipping_address,address_id",
+          )
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false });
+
+        if (!isMounted) return;
+
+        if (ordersLoadError) {
+          setOrders([]);
+          setOrdersError("تعذر تحميل الطلبات. حاول مرة أخرى.");
+          return;
+        }
+
+        const orderRows = (ordersData ?? []) as OrderRow[];
+        if (orderRows.length === 0) {
+          setOrders([]);
+          return;
+        }
+
+        const orderIds = orderRows.map((order) => order.id);
+        const { data: orderItemsData, error: orderItemsError } = await supabase
+          .from("order_items")
+          .select("order_id,variant_id,quantity,price")
+          .in("order_id", orderIds);
+
+        if (!isMounted) return;
+        if (orderItemsError) {
+          setOrdersError("تعذر تحميل عناصر الطلبات.");
+        }
+
+        const orderItems = (orderItemsData ?? []) as OrderItemRow[];
+        const variantIds = Array.from(
+          new Set(
+            orderItems
+              .map((item) => item.variant_id)
+              .filter((id): id is string => Boolean(id)),
+          ),
+        );
+
+        const variantMap = new Map<string, { name: string; imageUrl: string | null }>();
+
+        if (variantIds.length > 0) {
+          const { data: variantsData, error: variantsError } = await supabase
+            .from("product_variants")
+            .select("id,products(name),variant_images(image_url,is_main,created_at)")
+            .in("id", variantIds);
+
+          if (!isMounted) return;
+          if (variantsError) {
+            setOrdersError((prev) => prev ?? "تعذر تحميل بيانات المنتجات.");
+          } else {
+            for (const row of (variantsData ?? []) as VariantRow[]) {
+              const rawProduct = row.products ?? null;
+              const product = Array.isArray(rawProduct)
+                ? rawProduct[0]
+                : rawProduct;
+              const productName = product?.name?.trim() || "منتج";
+              const images = (row.variant_images ?? []) as VariantImage[];
+              const sortedImages = [...images].sort((a, b) => {
+                const aMain = a.is_main ? 1 : 0;
+                const bMain = b.is_main ? 1 : 0;
+                if (aMain !== bMain) return bMain - aMain;
+                const aTime = a.created_at
+                  ? new Date(a.created_at).getTime()
+                  : 0;
+                const bTime = b.created_at
+                  ? new Date(b.created_at).getTime()
+                  : 0;
+                return bTime - aTime;
+              });
+              variantMap.set(row.id, {
+                name: productName,
+                imageUrl: sortedImages[0]?.image_url ?? null,
+              });
+            }
+          }
+        }
+
+        const addressIds = Array.from(
+          new Set(
+            orderRows
+              .map((order) => order.address_id)
+              .filter((id): id is string => Boolean(id)),
+          ),
+        );
+        const addressMap = new Map<string, Address>();
+
+        if (addressIds.length > 0) {
+          const { data: addressesData } = await supabase
+            .from("addresses")
+            .select(
+              "id,user_id,country,city,street,postal_code,phone,is_default,created_at,updated_at",
+            )
+            .in("id", addressIds)
+            .eq("user_id", userId);
+
+          if (!isMounted) return;
+          for (const address of (addressesData ?? []) as Address[]) {
+            addressMap.set(address.id, address);
+          }
+        }
+
+        const itemsByOrder = new Map<string, OrderLineItem[]>();
+        for (const item of orderItems) {
+          const quantityRaw = Number(item.quantity ?? 1);
+          const quantity =
+            Number.isFinite(quantityRaw) && quantityRaw > 0
+              ? Math.round(quantityRaw)
+              : 1;
+          const unitPrice = Math.max(0, parseNumber(item.price));
+          const variantMeta = item.variant_id
+            ? variantMap.get(item.variant_id)
+            : null;
+          const nextItem: OrderLineItem = {
+            variantId: item.variant_id,
+            name: variantMeta?.name ?? "منتج",
+            quantity,
+            unitPrice,
+            lineTotal: unitPrice * quantity,
+            imageUrl: variantMeta?.imageUrl ?? null,
+          };
+          const current = itemsByOrder.get(item.order_id) ?? [];
+          current.push(nextItem);
+          itemsByOrder.set(item.order_id, current);
+        }
+
+        const nextOrders: OrderCard[] = orderRows.map((order) => {
+          const shippingAddress = asObject(order.shipping_address);
+          const shippingFromOrder = joinAddressParts([
+            asNonEmptyString(shippingAddress.street),
+            asNonEmptyString(shippingAddress.city),
+            asNonEmptyString(shippingAddress.country),
+          ]);
+          const linkedAddress = order.address_id
+            ? addressMap.get(order.address_id)
+            : null;
+          const shippingFromAddress = linkedAddress
+            ? joinAddressParts([
+                linkedAddress.street,
+                linkedAddress.city,
+                linkedAddress.country,
+              ])
+            : "";
+          const shippingLine =
+            shippingFromOrder ||
+            shippingFromAddress ||
+            "لم يتم إضافة عنوان توصيل";
+
+          const totalAmount = Math.max(0, parseNumber(order.total_amount));
+          const discountAmount = Math.max(0, parseNumber(order.discount_amount));
+          const payableAmount = Math.max(0, totalAmount - discountAmount);
+
+          return {
+            id: order.id,
+            status: order.status ?? "unpaid",
+            createdAt: order.created_at,
+            shippingLine,
+            totalAmount,
+            discountAmount,
+            payableAmount,
+            items: itemsByOrder.get(order.id) ?? [],
+          };
+        });
+
+        setOrders(nextOrders);
+      } finally {
+        if (isMounted) setOrdersLoading(false);
+      }
+    };
+
+    loadOrders();
+    return () => {
+      isMounted = false;
+    };
+  }, [activePanel, supabase, userId]);
 
   useEffect(() => {
     const panel = searchParams.get("panel") as PanelKey | null;
@@ -537,6 +837,8 @@ export default function ProfilePage() {
     }
   };
 
+  const selectedOrderId = searchParams.get("order");
+
   return (
     <section className="bg-white py-10">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10">
@@ -741,9 +1043,103 @@ export default function ProfilePage() {
             )}
 
             {activePanel === "orders" && (
-              <div className="rounded-sm border border-[#EEEEEE] bg-white p-6 text-sm text-[#666666]">
-                لا توجد طلبات حتى الآن.
-              </div>
+              <>
+                {ordersLoading ? (
+                  <div className="rounded-sm border border-[#EEEEEE] bg-white p-6 text-sm text-[#666666]">
+                    جاري تحميل الطلبات...
+                  </div>
+                ) : ordersError ? (
+                  <div className="rounded-sm border border-[#EEEEEE] bg-white p-6 text-sm text-[#D14343]">
+                    {ordersError}
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="rounded-sm border border-[#EEEEEE] bg-white p-6 text-sm text-[#666666]">
+                    لا توجد طلبات حتى الآن.
+                  </div>
+                ) : (
+                  <div className="grid gap-3">
+                    {orders.map((order) => {
+                      const statusMeta = getOrderStatusMeta(order.status);
+                      const isFocused = selectedOrderId === order.id;
+                      return (
+                        <div
+                          key={order.id}
+                          className={`rounded-sm border bg-white p-4 shadow-sm ${
+                            isFocused ? "border-[#B47720]" : "border-[#EEEEEE]"
+                          }`}
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="text-sm font-semibold text-[#333333]">
+                              رقم الطلب: {order.id}
+                            </p>
+                            <span
+                              className={`rounded-full px-2 py-1 text-[10px] font-semibold ${statusMeta.className}`}
+                            >
+                              {statusMeta.label}
+                            </span>
+                          </div>
+
+                          <p className="mt-2 text-xs text-[#666666]">
+                            تاريخ الطلب: {formatOrderDate(order.createdAt)}
+                          </p>
+                          <p className="mt-1 text-xs text-[#666666]">
+                            عنوان التوصيل: {order.shippingLine}
+                          </p>
+
+                          {order.items.length === 0 ? (
+                            <p className="mt-3 border-t border-[#EEEEEE] pt-3 text-xs text-[#888888]">
+                              لا توجد عناصر لهذا الطلب.
+                            </p>
+                          ) : (
+                            <div className="mt-3 space-y-3 border-t border-[#EEEEEE] pt-3">
+                              {order.items.map((item, index) => (
+                                <div
+                                  key={`${order.id}-${item.variantId ?? "item"}-${index}`}
+                                  className="flex items-center justify-between gap-3"
+                                >
+                                  <div className="flex min-w-0 items-center gap-3">
+                                    <Image
+                                      src={item.imageUrl || "/assets/logo.png"}
+                                      alt={item.name}
+                                      width={64}
+                                      height={64}
+                                      className="h-16 w-16 rounded-sm border border-[#EEEEEE] object-cover"
+                                    />
+                                    <div className="min-w-0 text-right">
+                                      <p className="truncate text-sm font-medium text-[#333333]">
+                                        {item.name}
+                                      </p>
+                                      <p className="text-xs text-[#888888]">
+                                        الكمية: {item.quantity}
+                                      </p>
+                                      <p className="text-xs text-[#888888]">
+                                        سعر الوحدة: {formatPrice(item.unitPrice)} ج.م
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <p className="shrink-0 text-xs text-[#666666]">
+                                    {formatPrice(item.lineTotal)} ج.م
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          <div className="mt-3 flex items-center justify-between border-t border-[#EEEEEE] pt-3 text-sm font-semibold text-[#333333]">
+                            <span>الإجمالي</span>
+                            <span>{formatPrice(order.payableAmount)} ج.م</span>
+                          </div>
+                          {order.discountAmount > 0 ? (
+                            <p className="mt-1 text-xs text-[#0F766E]">
+                              خصم مطبق: {formatPrice(order.discountAmount)} ج.م
+                            </p>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
             )}
 
             {activePanel === "account" && (

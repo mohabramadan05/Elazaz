@@ -72,6 +72,9 @@ type AppliedPromo = {
   discountPercent: number;
 };
 
+type FormField = Exclude<keyof CheckoutForm, "shipToDifferentAddress">;
+type FormErrors = Partial<Record<FormField, string>>;
+
 const getUnitPrice = (item: CartItem) => {
   const base = item.variant_price ?? 0;
   const discount = item.variant_discount_price ?? 0;
@@ -129,6 +132,46 @@ const extractPaymobRedirectUrl = (payload: unknown): string | null => {
 
 const countryOptions = ["مصر", "السعودية", "الإمارات", "الكويت", "قطر"];
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex = /^[0-9+\-\s()]{7,20}$/;
+
+const validateCheckoutForm = (
+  form: CheckoutForm,
+  options: { hasSavedAddresses: boolean; selectedAddressId: string },
+): FormErrors => {
+  const errors: FormErrors = {};
+
+  if (!form.firstName.trim()) errors.firstName = "الاسم الأول مطلوب";
+  if (!form.lastName.trim()) errors.lastName = "اسم العائلة مطلوب";
+
+  const email = form.email.trim();
+  if (!email) {
+    errors.email = "البريد الإلكتروني مطلوب";
+  } else if (!emailRegex.test(email)) {
+    errors.email = "صيغة البريد الإلكتروني غير صحيحة";
+  }
+
+  if (options.hasSavedAddresses) {
+    if (!options.selectedAddressId.trim()) {
+      errors.address = "اختر عنوانًا محفوظًا";
+    }
+  } else if (!form.address.trim()) {
+    errors.address = "العنوان مطلوب";
+  }
+
+  if (!form.country.trim()) errors.country = "البلد مطلوب";
+  if (!form.city.trim()) errors.city = "المدينة مطلوبة";
+
+  const phone = form.phone.trim();
+  if (!phone) {
+    errors.phone = "رقم الهاتف مطلوب";
+  } else if (!phoneRegex.test(phone)) {
+    errors.phone = "رقم الهاتف غير صحيح";
+  }
+
+  return errors;
+};
+
 export default function CheckoutPage() {
   const supabase = useMemo(() => createClient(), []);
   const [items, setItems] = useState<CartItem[]>([]);
@@ -144,6 +187,7 @@ export default function CheckoutPage() {
   const [savedAddresses, setSavedAddresses] = useState<AddressRow[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [isAddressesLoading, setIsAddressesLoading] = useState(true);
+  const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
   const [form, setForm] = useState<CheckoutForm>({
     firstName: "",
     lastName: "",
@@ -269,6 +313,12 @@ export default function CheckoutPage() {
     (field: Exclude<keyof CheckoutForm, "shipToDifferentAddress">) =>
     (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setForm((prev) => ({ ...prev, [field]: event.target.value }));
+      setFieldErrors((prev) => {
+        if (!prev[field]) return prev;
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
     };
 
   const handleAddressSelect = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -288,6 +338,14 @@ export default function CheckoutPage() {
       postalCode: selectedAddress.postal_code ?? "",
       phone: selectedAddress.phone ?? prev.phone,
     }));
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      delete next.address;
+      delete next.country;
+      delete next.city;
+      delete next.phone;
+      return next;
+    });
   };
 
   const handleCouponCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -372,7 +430,19 @@ export default function CheckoutPage() {
     event.preventDefault();
     if (isSubmitting || isLoading || isCartEmpty) return;
 
+    const validationErrors = validateCheckoutForm(form, {
+      hasSavedAddresses: savedAddresses.length > 0,
+      selectedAddressId,
+    });
+    if (Object.keys(validationErrors).length > 0) {
+      setFieldErrors(validationErrors);
+      setSubmitError("يرجى تصحيح الحقول المطلوبة");
+      setSubmitSuccess(null);
+      return;
+    }
+
     setIsSubmitting(true);
+    setFieldErrors({});
     setSubmitError(null);
     setSubmitSuccess(null);
 
@@ -622,7 +692,12 @@ export default function CheckoutPage() {
               أضف البيانات المطلوبة لإتمام الطلب
             </p>
 
-            <form id="checkout-form" className="mt-6 space-y-5" onSubmit={handleSubmit}>
+            <form
+              id="checkout-form"
+              className="mt-6 space-y-5"
+              onSubmit={handleSubmit}
+              noValidate
+            >
               <div className="grid gap-4 lg:grid-cols-3">
                 <div>
                   <label
@@ -636,8 +711,15 @@ export default function CheckoutPage() {
                     type="text"
                     value={form.firstName}
                     onChange={handleFieldChange("firstName")}
-                    className="w-full rounded-sm border border-[#E5E5E5] px-3 py-2 text-sm text-[#333333] focus:border-[#B47720] focus:outline-none"
+                    className={`w-full rounded-sm border px-3 py-2 text-sm text-[#333333] focus:outline-none ${
+                      fieldErrors.firstName
+                        ? "border-[#D14343] focus:border-[#D14343]"
+                        : "border-[#E5E5E5] focus:border-[#B47720]"
+                    }`}
                   />
+                  {fieldErrors.firstName ? (
+                    <p className="mt-1 text-xs text-[#D14343]">{fieldErrors.firstName}</p>
+                  ) : null}
                 </div>
                 <div>
                   <label
@@ -651,8 +733,15 @@ export default function CheckoutPage() {
                     type="text"
                     value={form.lastName}
                     onChange={handleFieldChange("lastName")}
-                    className="w-full rounded-sm border border-[#E5E5E5] px-3 py-2 text-sm text-[#333333] focus:border-[#B47720] focus:outline-none"
+                    className={`w-full rounded-sm border px-3 py-2 text-sm text-[#333333] focus:outline-none ${
+                      fieldErrors.lastName
+                        ? "border-[#D14343] focus:border-[#D14343]"
+                        : "border-[#E5E5E5] focus:border-[#B47720]"
+                    }`}
                   />
+                  {fieldErrors.lastName ? (
+                    <p className="mt-1 text-xs text-[#D14343]">{fieldErrors.lastName}</p>
+                  ) : null}
                 </div>
                 <div>
                   <label
@@ -680,8 +769,15 @@ export default function CheckoutPage() {
                   type="email"
                   value={form.email}
                   onChange={handleFieldChange("email")}
-                  className="w-full rounded-sm border border-[#E5E5E5] px-3 py-2 text-sm text-[#333333] focus:border-[#B47720] focus:outline-none"
+                  className={`w-full rounded-sm border px-3 py-2 text-sm text-[#333333] focus:outline-none ${
+                    fieldErrors.email
+                      ? "border-[#D14343] focus:border-[#D14343]"
+                      : "border-[#E5E5E5] focus:border-[#B47720]"
+                  }`}
                 />
+                {fieldErrors.email ? (
+                  <p className="mt-1 text-xs text-[#D14343]">{fieldErrors.email}</p>
+                ) : null}
               </div>
 
               <div>
@@ -694,7 +790,11 @@ export default function CheckoutPage() {
                     value={selectedAddressId}
                     onChange={handleAddressSelect}
                     disabled={isAddressesLoading}
-                    className="w-full rounded-sm border border-[#E5E5E5] bg-white px-3 py-2 text-sm text-[#333333] focus:border-[#B47720] focus:outline-none disabled:cursor-not-allowed disabled:bg-[#F8F8F8]"
+                    className={`w-full rounded-sm border bg-white px-3 py-2 text-sm text-[#333333] focus:outline-none disabled:cursor-not-allowed disabled:bg-[#F8F8F8] ${
+                      fieldErrors.address
+                        ? "border-[#D14343] focus:border-[#D14343]"
+                        : "border-[#E5E5E5] focus:border-[#B47720]"
+                    }`}
                   >
                     <option value="">
                       {isAddressesLoading
@@ -713,9 +813,16 @@ export default function CheckoutPage() {
                     type="text"
                     value={form.address}
                     onChange={handleFieldChange("address")}
-                    className="w-full rounded-sm border border-[#E5E5E5] px-3 py-2 text-sm text-[#333333] focus:border-[#B47720] focus:outline-none"
+                    className={`w-full rounded-sm border px-3 py-2 text-sm text-[#333333] focus:outline-none ${
+                      fieldErrors.address
+                        ? "border-[#D14343] focus:border-[#D14343]"
+                        : "border-[#E5E5E5] focus:border-[#B47720]"
+                    }`}
                   />
                 )}
+                {fieldErrors.address ? (
+                  <p className="mt-1 text-xs text-[#D14343]">{fieldErrors.address}</p>
+                ) : null}
                 {savedAddresses.length === 0 && !isAddressesLoading ? (
                   <p className="mt-2 text-xs text-[#999999]">
                     لا توجد عناوين محفوظة. أضف عنوانًا من صفحة حسابي.
@@ -732,7 +839,11 @@ export default function CheckoutPage() {
                     id="country"
                     value={form.country}
                     onChange={handleFieldChange("country")}
-                    className="w-full rounded-sm border border-[#E5E5E5] bg-white px-3 py-2 text-sm text-[#666666] focus:border-[#B47720] focus:outline-none"
+                    className={`w-full rounded-sm border bg-white px-3 py-2 text-sm text-[#666666] focus:outline-none ${
+                      fieldErrors.country
+                        ? "border-[#D14343] focus:border-[#D14343]"
+                        : "border-[#E5E5E5] focus:border-[#B47720]"
+                    }`}
                   >
                     <option value="">اختر...</option>
                     {countrySelectOptions.map((option) => (
@@ -741,6 +852,9 @@ export default function CheckoutPage() {
                       </option>
                     ))}
                   </select>
+                  {fieldErrors.country ? (
+                    <p className="mt-1 text-xs text-[#D14343]">{fieldErrors.country}</p>
+                  ) : null}
                 </div>
                 <div>
                   <label htmlFor="city" className="mb-2 block text-sm text-[#555555]">
@@ -751,8 +865,15 @@ export default function CheckoutPage() {
                     type="text"
                     value={form.city}
                     onChange={handleFieldChange("city")}
-                    className="w-full rounded-sm border border-[#E5E5E5] px-3 py-2 text-sm text-[#333333] focus:border-[#B47720] focus:outline-none"
+                    className={`w-full rounded-sm border px-3 py-2 text-sm text-[#333333] focus:outline-none ${
+                      fieldErrors.city
+                        ? "border-[#D14343] focus:border-[#D14343]"
+                        : "border-[#E5E5E5] focus:border-[#B47720]"
+                    }`}
                   />
+                  {fieldErrors.city ? (
+                    <p className="mt-1 text-xs text-[#D14343]">{fieldErrors.city}</p>
+                  ) : null}
                 </div>
                 <div>
                   <label
@@ -780,8 +901,15 @@ export default function CheckoutPage() {
                   type="tel"
                   value={form.phone}
                   onChange={handleFieldChange("phone")}
-                  className="w-full rounded-sm border border-[#E5E5E5] px-3 py-2 text-sm text-[#333333] focus:border-[#B47720] focus:outline-none"
+                  className={`w-full rounded-sm border px-3 py-2 text-sm text-[#333333] focus:outline-none ${
+                    fieldErrors.phone
+                      ? "border-[#D14343] focus:border-[#D14343]"
+                      : "border-[#E5E5E5] focus:border-[#B47720]"
+                  }`}
                 />
+                {fieldErrors.phone ? (
+                  <p className="mt-1 text-xs text-[#D14343]">{fieldErrors.phone}</p>
+                ) : null}
               </div>
 
               <div className="flex items-center justify-end gap-2 text-sm text-[#555555]">

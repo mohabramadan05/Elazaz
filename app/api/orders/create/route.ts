@@ -28,6 +28,9 @@ type VariantPriceRow = {
   price: number | string | null;
 };
 
+const DELIVERY_BASE_FEE = 1000;
+const DELIVERY_FEE_PER_ITEM = 130;
+
 const hasOwn = (obj: object, key: string) =>
   Object.prototype.hasOwnProperty.call(obj, key);
 
@@ -250,10 +253,19 @@ export async function POST(request: Request) {
     );
   }
 
-  const totalAmount = normalizedItems.reduce((sum, item) => {
+  const itemsSubtotal = normalizedItems.reduce((sum, item) => {
     const Price = variantPrices.get(item.variantId as string) ?? 0;
     return sum + Price * item.quantity;
   }, 0);
+  const totalItemsCount = normalizedItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0,
+  );
+  const deliveryFee =
+    totalItemsCount > 0
+      ? DELIVERY_BASE_FEE + totalItemsCount * DELIVERY_FEE_PER_ITEM
+      : 0;
+  const totalAmount = itemsSubtotal + deliveryFee;
 
   const firstName = payload.first_name ?? null;
   const secondName = payload.second_name ?? payload.last_name ?? null;
