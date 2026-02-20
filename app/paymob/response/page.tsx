@@ -7,7 +7,7 @@ import { Check, Loader2, X } from "lucide-react";
 
 type PaymentResponse = {
   order_id: string;
-  status: "paid" | "failed" | "unpaid" | string;
+  status: "paid" | "failed" | "unpaid" | "pending" | string;
   transaction_id: string | null;
   error?: string;
 };
@@ -54,7 +54,7 @@ function LoadingState() {
           <Loader2 className="h-8 w-8 animate-spin text-[#B47720]" />
         </div>
         <h1 className="mt-6 text-4xl font-bold text-[#2F2F2F]">
-          Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø§Ù„Ø¯ÙØ¹...
+          جاري التحقق من الدفع...
         </h1>
       </div>
     </section>
@@ -64,6 +64,7 @@ function LoadingState() {
 function PaymobResponseContent() {
   const searchParams = useSearchParams();
   const queryString = useMemo(() => searchParams.toString(), [searchParams]);
+
   const [result, setResult] = useState<PaymentResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -71,43 +72,66 @@ function PaymobResponseContent() {
   useEffect(() => {
     let mounted = true;
 
-    const loadStatus = async () => {
+    // Poll because the redirect can arrive before processed webhook updates DB
+    const POLL_INTERVAL_MS = 2000;
+    const MAX_POLL_MS = 25000; // 25s
+    const startedAt = Date.now();
+
+    const run = async () => {
       setLoading(true);
       setFetchError(null);
 
-      try {
-        const endpoint = queryString
-          ? `/api/paymob/response?${queryString}`
-          : "/api/paymob/response";
-        const response = await fetch(endpoint, { cache: "no-store" });
-        const payload = (await response.json().catch(() => ({}))) as PaymentResponse;
+      while (mounted) {
+        try {
+          const endpoint = queryString
+            ? `/api/paymob/response?${queryString}`
+            : "/api/paymob/response";
 
-        if (!mounted) return;
+          const response = await fetch(endpoint, { cache: "no-store" });
+          const payload = (await response.json().catch(() => ({}))) as PaymentResponse;
 
-        if (!response.ok) {
+          if (!mounted) return;
+
+          if (!response.ok) {
+            setResult(null);
+            setFetchError(payload.error ?? "تعذر قراءة حالة الدفع.");
+            setLoading(false);
+            return;
+          }
+
+          setResult(payload);
+
+          const s = payload.status;
+          const done = s === "paid" || s === "failed";
+          const timedOut = Date.now() - startedAt > MAX_POLL_MS;
+
+          if (done || timedOut) {
+            setLoading(false);
+            return;
+          }
+
+          // wait then try again
+          await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+        } catch {
+          if (!mounted) return;
           setResult(null);
-          setFetchError(payload.error ?? "تعذر قراءة حالة الدفع.");
+          setFetchError("تعذر قراءة حالة الدفع.");
+          setLoading(false);
           return;
         }
-
-        setResult(payload);
-      } catch {
-        if (!mounted) return;
-        setResult(null);
-        setFetchError("تعذر قراءة حالة الدفع.");
-      } finally {
-        if (mounted) setLoading(false);
       }
     };
 
-    loadStatus();
+    run();
+
     return () => {
       mounted = false;
     };
   }, [queryString]);
 
-  const status = result?.status ?? "unpaid";
+  const status = result?.status ?? "pending";
   const content = getStatusContent(status);
+
   const orderUrl = result?.order_id
     ? `/profile?panel=orders&order=${encodeURIComponent(result.order_id)}`
     : "/profile?panel=orders";
@@ -143,7 +167,11 @@ function PaymobResponseContent() {
           </div>
 
           <h1 className="mt-6 text-4xl font-bold text-[#2F2F2F]">
-            {loading ? "جاري التحقق من الدفع..." : fetchError ? "تعذر التحقق من حالة الطلب" : content.title}
+            {loading
+              ? "جاري التحقق من الدفع..."
+              : fetchError
+                ? "تعذر التحقق من حالة الطلب"
+                : content.title}
           </h1>
 
           <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#7B7B7B]">
@@ -165,6 +193,7 @@ function PaymobResponseContent() {
             >
               مشاهدة الطلب
             </Link>
+
             <Link
               href="/shop"
               className="inline-flex min-w-44 items-center justify-center rounded-sm border border-[#B47720] bg-transparent px-6 py-3 text-sm font-semibold text-[#B47720] hover:bg-[#B47720] hover:text-white"
