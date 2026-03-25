@@ -28,8 +28,9 @@ type VariantPriceRow = {
   price: number | string | null;
 };
 
-const DELIVERY_BASE_FEE = 1000;
-const DELIVERY_FEE_PER_ITEM = 130;
+// to edit 
+const DELIVERY_BASE_FEE = 0;
+const DELIVERY_FEE_PER_ITEM = 0;
 
 const hasOwn = (obj: object, key: string) =>
   Object.prototype.hasOwnProperty.call(obj, key);

@@ -17,7 +17,7 @@ export default function Header() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [footerBadgeSrc, setFooterBadgeSrc] = useState({
-    vat: "/assets/vat.jpg",
+    vat: "/assets/vat.png",
     visa: "/assets/visa.png",
     mastercard: "/assets/mastercard.png",
     paypal: "/assets/paypal.png",
