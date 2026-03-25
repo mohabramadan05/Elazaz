@@ -63,12 +63,13 @@ export default function CartPage() {
     return items.reduce((count, item) => count + (item.quantity ?? 1), 0);
   }, [items]);
 
+// to edit 
   const deliveryFee = useMemo(() => {
     if (totalItemsCount <= 0) return 0;
     return 1000 + totalItemsCount * 130;
   }, [totalItemsCount]);
 
-  const total = subtotal + deliveryFee;
+  const total = subtotal ;
 
   const handleQuantityChange = async (
     itemId: string,
