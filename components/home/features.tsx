@@ -99,7 +99,7 @@ const CardIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function FeaturesBar() {
   const features: Feature[] = [
     { title: "منتجات مضمونه", desc: "مدفوعات آمنة أقساط تصل إلى 12 شهراً", icon: <TruckIcon /> },
-    { title: "شحن مجاني", desc: "مدفوعات آمنة أقساط تصل إلى 12 شهراً", icon: <ClockIcon /> },
+    { title: "شحن الي جميع الدول", desc: "مدفوعات آمنة أقساط تصل إلى 12 شهراً", icon: <ClockIcon /> },
     { title: "مدفوعات آمنة", desc: "مدفوعات آمنة أقساط تصل إلى 12 شهراً", icon: <CardIcon /> },
   ];
 

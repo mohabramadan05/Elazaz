@@ -169,8 +169,14 @@ export default function Header() {
 
       {/* Copyright */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 text-white bg-[#1D1F1F] text-sm p-4">
-        <span className="text-center lg:text-right">
-          &copy; {new Date().getFullYear()} ELAZAZ. جميع الحقوق محفوظة.
+        <span className="flex flex-wrap items-center justify-center lg:justify-end gap-x-2 text-sm">
+          <span>&copy; {new Date().getFullYear()}</span>
+          <span className="text-gray-400">|</span>
+          <span>By Sword Technologies</span>
+          <span className="text-gray-400">|</span>
+          <span lang="ar" dir="rtl">
+            ELAZAZ &mdash; جميع الحقوق محفوظة.
+          </span>
         </span>
         <div className="flex flex-row flex-wrap justify-center lg:justify-end gap-2 items-center">
           <Image
@@ -179,16 +185,16 @@ export default function Header() {
             height={30}
             alt="vat"
             className="h-6 w-auto"
-            onError={() => handleFooterBadgeError("vat")}
+            // onError={() => handleFooterBadgeError("vat")}
           />
           <p className="pe-0 lg:pe-5">757-426-174 : الرقم الضريبي</p>
           <Image
             src={footerBadgeSrc.visa}
             width={64}
             height={31}
-            alt="visa"  
+            alt="visa"
             className="h-6 w-auto"
-            onError={() => handleFooterBadgeError("visa")}
+            // onError={() => handleFooterBadgeError("visa")}
           />
           <Image
             src={footerBadgeSrc.mastercard}
@@ -196,7 +202,7 @@ export default function Header() {
             height={31}
             alt="mastercard"
             className="h-6 w-auto"
-            onError={() => handleFooterBadgeError("mastercard")}
+            // onError={() => handleFooterBadgeError("mastercard")}
           />
           <Image
             src={footerBadgeSrc.paypal}
@@ -204,7 +210,7 @@ export default function Header() {
             height={31}
             alt="paypal"
             className="h-6 w-auto"
-            onError={() => handleFooterBadgeError("paypal")}
+            // onError={() => handleFooterBadgeError("paypal")}
           />
         </div>
       </div>

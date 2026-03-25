@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { openAuthModal } from "@/lib/auth-modal";
+import Link from "next/link";
 
 type Props = {
   variantId?: string;
@@ -96,10 +97,9 @@ export default function ProductActions({ variantId }: Props) {
           </svg>
           <p>أضف للسلة</p>
         </button>
-        <button
+        <Link
           type="button"
-          onClick={handleAddToCart}
-          disabled={!variantId || isAdding}
+          href={"https://wa.me/201027043700"}
           className={`flex-1 h-11 bg-[#B47720] flex justify-center items-center gap-1 text-white rounded-sm text-sm font-semibold transition hover:opacity-90 ${
             isAdding ? "opacity-70 cursor-not-allowed" : ""
           }`}
@@ -125,7 +125,7 @@ export default function ProductActions({ variantId }: Props) {
             />
           </svg>
           <p>الشراء السريع</p>
-        </button>
+        </Link>
       </div>
     </div>
   );
