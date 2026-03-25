@@ -289,13 +289,12 @@ export default function CheckoutPage() {
     return items.reduce((count, item) => count + (item.quantity ?? 1), 0);
   }, [items]);
 
-// to edit 
   const deliveryFee = useMemo(() => {
     if (totalItemsCount <= 0) return 0;
     return 1000 + totalItemsCount * 130;
   }, [totalItemsCount]);
 
-  const total = subtotal ;
+  const total = subtotal + deliveryFee;
   const discountAmount = useMemo(() => {
     if (!appliedPromo) return 0;
     return Math.round((subtotal * appliedPromo.discountPercent) / 100);
