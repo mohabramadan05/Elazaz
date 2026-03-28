@@ -19,7 +19,7 @@ const slides = [
     button: "اكتشف المزيد",
     target: "/shop/offer",
     image:
-      "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=1920",
+      "/assets/sliders/1.jpeg",
   },
   {
     title: "أناقة لا تُضاهى",
@@ -28,7 +28,7 @@ const slides = [
     button: "تسوق الآن",
     target: "/shop",
     image:
-      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1920",
+      "/assets/sliders/2.jpeg",
   },
   {
     title: "مجموعة حصرية",
@@ -36,7 +36,7 @@ const slides = [
     button: "استكشف المجموعة",
     target: "/shop",
     image:
-      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1920",
+      "/assets/sliders/3.jpeg",
   },
 ];
 
