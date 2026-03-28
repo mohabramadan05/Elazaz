@@ -5,7 +5,7 @@ export default function AboutUsPage() {
   return (
     <StaticPage
       title="من نحن"
-      subtitle="الأزاز متجر سعودي مختص بالحقائب والأحذية والإكسسوارات الراقية، نقدّم تشكيلة منتقاة بعناية وتجربة تسوق موثوقة وسهلة."
+      subtitle="الأزاز متجر مختص بالحقائب والأحذية والإكسسوارات الراقية، نقدّم تشكيلة منتقاة بعناية وتجربة تسوق موثوقة وسهلة."
     >
       <div className="bg-white border border-[#EFEFEF] rounded-2xl p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-[#333333] mb-3">قصتنا</h2>
